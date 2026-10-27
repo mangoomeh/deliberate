@@ -1,0 +1,60 @@
+// Daily drills for this subject. Multiple-choice drills have `options` + `answer`; open drills
+// have a model `answer` that is revealed, and the learner rates their own attempt.
+export const drills = [
+  {
+    id: 'web-dr-1',
+    kind: 'code',
+    prompt: 'You type `https://shop.example/cart` and press Enter. List, in order, the main steps before you see the page.',
+    answer: '1) DNS: look up the IP address for shop.example (often cached). 2) Open a connection to that IP on port 443 (TCP handshake, or QUIC for HTTP/3). 3) TLS handshake: agree encryption, check the certificate. 4) Send `GET /cart` with headers such as cookies. 5) The server (or a CDN) responds with status, headers and HTML. 6) The browser parses HTML into the DOM, requests the CSS, JavaScript and images it references, builds the render tree, lays out and paints. 7) JavaScript runs and makes the page interactive.',
+  },
+  {
+    id: 'web-dr-2',
+    kind: 'code',
+    prompt: 'What does this log? `console.log("A"); setTimeout(() => console.log("B"), 0); Promise.resolve().then(() => console.log("C")); console.log("D")`',
+    options: ['A B C D', 'A D C B', 'A D B C', 'A C D B'],
+    answer: 1,
+    explanation: 'Synchronous code runs first (A, D). Then the microtask queue (promise: C), then the next task (timeout: B).',
+  },
+  {
+    id: 'web-dr-3',
+    kind: 'code',
+    prompt: 'Your React app at `http://localhost:5173` calls your API at `http://localhost:3000` and the browser shows a CORS error. curl works fine. Why, and where do you fix it?',
+    answer: 'Different ports make different origins, so the browser applies the same-origin policy; curl isn\'t a browser, so it doesn\'t. Fix it on the API server by sending `Access-Control-Allow-Origin: http://localhost:5173` (and handling OPTIONS preflights), or use the dev server\'s proxy so the frontend calls its own origin. Don\'t "fix" it in frontend code; browsers enforce CORS to protect users.',
+  },
+  {
+    id: 'web-dr-4',
+    kind: 'code',
+    prompt: 'A server returns `500` to `const data = await fetch(url).then(r => r.json())`. What happens?',
+    options: ['fetch rejects with the 500', 'fetch fulfils; r.json() may fail if the body isn\'t JSON, and the 500 is silently ignored unless you check r.ok', 'The browser retries automatically', 'The page reloads'],
+    answer: 1,
+    explanation: 'fetch only rejects on network failure. Always check `response.ok` or `response.status`.',
+  },
+  {
+    id: 'web-dr-5',
+    kind: 'design',
+    prompt: 'You\'re building a live sports score page: scores change every few seconds, and viewers only watch. Polling, server-sent events or WebSockets?',
+    options: ['Polling every 100 ms', 'Server-sent events: one-way push from server to client, with auto-reconnect', 'WebSockets, because they\'re newest', 'Email updates'],
+    answer: 1,
+    explanation: 'Viewers don\'t send data back, so a one-way stream fits; WebSockets add two-way complexity you don\'t need.',
+  },
+  {
+    id: 'web-dr-6',
+    kind: 'code',
+    prompt: 'An endpoint `GET /api/invoices/:id` checks the user is logged in, then returns the invoice. What\'s wrong, and how do you fix it?',
+    answer: 'It doesn\'t check the invoice belongs to the logged-in user, so anyone logged in can change the ID and read other people\'s invoices: broken access control, OWASP\'s #1 risk. Fix: load the invoice and compare its owner with the session\'s user (or query `WHERE id = $1 AND user_id = $2`), returning 404 or 403 if it doesn\'t match.',
+  },
+  {
+    id: 'web-dr-7',
+    kind: 'design',
+    prompt: 'A marketing site has 30 pages that change only when the team publishes. Which rendering approach fits best?',
+    options: ['Client-side rendering with a large framework', 'Static rendering at build time, served from a CDN', 'Server-side rendering on every request', 'WebSockets'],
+    answer: 1,
+    explanation: 'Every page is known in advance; static HTML on a CDN is fastest and cheapest.',
+  },
+  {
+    id: 'web-dr-8',
+    kind: 'code',
+    prompt: 'A Node server listens on `127.0.0.1:8000` on a cloud machine, behind Nginx on port 443. Users can reach the site. A teammate says the app should listen on `0.0.0.0` instead. Is that needed?',
+    answer: 'No. Nginx runs on the same machine and connects to 127.0.0.1:8000, so listening locally is enough, and safer: the app isn\'t reachable from the internet except through the proxy, which handles TLS, limits and static files. Listening on 0.0.0.0 is needed when the proxy or load balancer is on a different machine or the app runs in a container, ideally with a firewall allowing only the proxy.',
+  },
+]

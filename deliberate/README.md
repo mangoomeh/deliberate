@@ -9,14 +9,14 @@ Each day the app gives you four short "reps":
 3. **Solve a daily drill.** Short scenarios from your subjects: spot fallacies, read statistics, reason about code, handle a tricky conversation, do the money maths.
 4. **Reflect.** A rotating journal prompt. Lesson practice answers are saved to the journal too.
 
-**The library** (Learn tab) holds 18 subjects in six groups:
+**The library** (Learn tab) holds 19 subjects in six groups:
 
 - **Learn and think**: How to Learn, Critical Thinking, Decision Making, Statistics and Data.
 - **Get things done**: Focus and Productivity, Habits and Behaviour Change.
 - **Health and wellbeing**: Health Basics, Stress and Emotions.
 - **Work with people**: Communication and Writing, Feedback and Hard Conversations, Negotiation, Leadership and Teamwork.
 - **Money and business**: Personal Finance, Economics Basics, Business Basics.
-- **Career and technology**: Career Growth, Software Engineering, Artificial Intelligence.
+- **Career and technology**: Career Growth, Web Development, Software Engineering, Artificial Intelligence.
 
 You set your **daily plan**: the subjects Today draws your lesson and drill from. On first use, Today asks you to choose them, and you can change them any time from the library. You can open any lesson, whether or not its subject is in your plan. Each subject has units of bite-sized lessons: at most 3 ideas each and about 8–11 minutes, with a quiz, flashcards and usually a practice exercise. Each lesson shows its size ("3 ideas · ~11 min") and what it covers. If you stop partway, your quiz answers, notes and place on the page are saved, and the lesson shows as "In progress". Software Engineering also has optional "On the job" units: 36 practical lessons on things you meet at work but rarely learn in school (health checks, heartbeats, cron, background workers, retries, idempotency, observability, deploys, migrations, rate limiting, time zones and more). You can search across every lesson. Subjects added since October 2026 were researched against primary sources (studies, official guidance), and their lessons list those sources; health, stress and money subjects are general education, not professional advice.
 

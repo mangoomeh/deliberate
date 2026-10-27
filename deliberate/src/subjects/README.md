@@ -66,7 +66,8 @@ The content check fails any lesson over the limits and tells you which.
   ideas: ['Interest on interest', 'The rule of 72'],  // 1–3, shown as "In this lesson"
   // Write the body with one section (## heading) per idea, each with an example.
   body: `Markdown-lite: ## headings, paragraphs, - lists, 1. lists, > callouts,
-\`\`\` code blocks \`\`\`, **bold** and \`inline code\`.`,
+\`\`\` code blocks \`\`\`, | tables | (first row is the header),
+**bold** and \`inline code\`.`,
   takeaways: ['Three to five short points.'],
   quiz: [                              // at least one question per idea
     { q: 'Question?', options: ['A', 'B', 'C', 'D'], answer: 1, why: 'Why B is right.' },

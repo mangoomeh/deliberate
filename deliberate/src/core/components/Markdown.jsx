@@ -1,6 +1,6 @@
 // A deliberately tiny renderer for the subset of Markdown the lessons use:
-// ## headings, paragraphs, "- " and "1. " lists, > callouts, ``` code fences,
-// plus **bold** and `code` inline.
+// ## headings, paragraphs, "- " and "1. " lists, > callouts, ``` code fences, | tables |
+// (first row is the header; the |---| row is skipped), plus **bold** and `code` inline.
 function inline(text, keyPrefix) {
   const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g)
   return parts.map((part, i) => {
@@ -35,11 +35,17 @@ function parse(source) {
       const body = []
       while (i < lines.length && lines[i].startsWith('> ')) body.push(lines[i++].slice(2))
       blocks.push({ type: 'quote', text: body.join(' ') })
+    } else if (line.startsWith('|')) {
+      const rows = []
+      while (i < lines.length && lines[i].startsWith('|')) rows.push(lines[i++])
+      const cells = (row) => row.replace(/^\||\|$/g, '').split('|').map((c) => c.trim())
+      const [head, ...rest] = rows
+      blocks.push({ type: 'table', head: cells(head), rows: rest.filter((r) => !/^\|[\s:|-]+\|$/.test(r)).map(cells) })
     } else if (line.trim() === '') {
       i++
     } else {
       const body = []
-      while (i < lines.length && lines[i].trim() !== '' && !/^(```|## |- |\d+\. |> )/.test(lines[i])) body.push(lines[i++])
+      while (i < lines.length && lines[i].trim() !== '' && !/^(```|## |- |\d+\. |> |\|)/.test(lines[i])) body.push(lines[i++])
       blocks.push({ type: 'p', text: body.join(' ') })
     }
   }
@@ -70,6 +76,21 @@ export default function Markdown({ source }) {
             const List = b.type
             return <List key={k}>{b.items.map((item, j) => <li key={j}>{inline(item, `${k}-${j}`)}</li>)}</List>
           }
+          case 'table':
+            return (
+              <div key={k} className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>{b.head.map((c, j) => <th key={j} scope="col">{inline(c, `${k}-h${j}`)}</th>)}</tr>
+                  </thead>
+                  <tbody>
+                    {b.rows.map((r, j) => (
+                      <tr key={j}>{r.map((c, n) => <td key={n}>{inline(c, `${k}-${j}-${n}`)}</td>)}</tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )
           case 'quote':
             return <blockquote key={k}>{inline(b.text, k)}</blockquote>
           default:

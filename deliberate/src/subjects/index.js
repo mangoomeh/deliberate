@@ -14,6 +14,7 @@ import finance from './finance/index.js'
 import economics from './economics/index.js'
 import business from './business/index.js'
 import career from './career/index.js'
+import web from './web/index.js'
 import engineering from './engineering/index.js'
 import ai from './ai/index.js'
 
@@ -25,7 +26,7 @@ export const categories = [
   { id: 'wellbeing', title: 'Health and wellbeing', subjects: [health, stress] },
   { id: 'people', title: 'Work with people', subjects: [communication, feedback, negotiation, leadership] },
   { id: 'money', title: 'Money and business', subjects: [finance, economics, business] },
-  { id: 'work', title: 'Career and technology', subjects: [career, engineering, ai] },
+  { id: 'work', title: 'Career and technology', subjects: [career, web, engineering, ai] },
 ]
 
 export const subjects = categories.flatMap((c) => c.subjects)

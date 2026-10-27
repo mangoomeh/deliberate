@@ -215,6 +215,11 @@ input[type='range'] { padding: 0; border: 0; accent-color: var(--accent); backgr
   font-size: 0.875rem; line-height: 1.6; border: 1px solid var(--line);
 }
 .code code { background: none; padding: 0; font-size: inherit; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+.prose table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; line-height: 1.5; }
+.prose th, .prose td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.prose th { background: var(--code-bg); font-weight: 650; }
+.prose tbody tr:last-child td { border-bottom: 0; }
 
 .takeaways { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--t); border-radius: var(--radius); padding: 18px 20px; }
 .takeaways h2 { font-size: var(--step-1); margin-bottom: 8px; }

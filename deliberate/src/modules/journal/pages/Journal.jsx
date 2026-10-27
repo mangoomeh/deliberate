@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useDispatch, useSlice } from '../../../core/store/ProgressStore'
 import { dayIndex, dayKey, formatDay } from '../../../core/lib/dates'
 import { PageHeader } from '../../../core/components/ui'
+import { Inline } from '../../../core/components/Markdown'
 import { reflectionPrompts } from '../data/prompts'
 import { XP_PER_ENTRY, addEntry, deleteEntry } from '../api'
 
@@ -71,7 +72,7 @@ export default function Journal() {
                     <button className="link small muted" onClick={() => setConfirmId(r.id)}>Delete</button>
                   )}
                 </div>
-                <p className="entry-prompt">{r.prompt}</p>
+                <p className="entry-prompt"><Inline text={r.prompt} /></p>
                 <p className="entry-text">{r.text}</p>
               </li>
             ))}

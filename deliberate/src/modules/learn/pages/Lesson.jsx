@@ -70,7 +70,7 @@ function Practice({ lesson, draftText, onDraft }) {
   return (
     <section className="practice" aria-labelledby="pr-h">
       <h2 id="pr-h" className="section-title">Practice</h2>
-      <p>{lesson.practice}</p>
+      <p><Inline text={lesson.practice} /></p>
       {saved ? (
         <p className="good">Saved to your journal. +{XP_PER_ENTRY} XP</p>
       ) : (
