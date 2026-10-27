@@ -414,7 +414,7 @@ Many modern apps go further and send almost **no** HTML from the application: th
 
 Data takes time to cross the world: a round trip from Singapore to a server in Virginia takes over 200 milliseconds, and loading a page needs many round trips. A **content delivery network (CDN)** is, in MDN's words, a group of servers spread out over many locations that store copies of data, so requests can be answered by whichever server is **closest** to the user.
 
-Deliberate is a real example. Its response headers include \`via: 1.1 varnish\` and \`x-served-by: cache-iad-…\`: GitHub Pages sits behind a CDN (Fastly), and that request was answered by a cache server near Washington, D.C., not by a machine holding the repository.
+Deliberate is a real example. GitHub Pages sits behind a CDN (Fastly), whose servers share the same IP addresses worldwide, so the internet's routing sends each visitor to the nearest one (this is called **anycast**). The response header \`x-served-by\` names the server that answered, ending in an airport code: a test request from the US got \`cache-iad-…\`, near Washington, D.C.; a visitor in Singapore would see \`cache-sin-…\`. Either way, it's a cache near the visitor, not the machine holding the repository.
 
 ## Caches and Cache-Control
 
