@@ -41,6 +41,23 @@ const SRC = {
   owaspTop10: { title: 'OWASP Top 10:2025', url: 'https://owasp.org/Top10/2025/' },
   sqlCheat: { title: 'OWASP: SQL injection prevention cheat sheet', url: 'https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html' },
   xssCheat: { title: 'OWASP: Cross-site scripting prevention cheat sheet', url: 'https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html' },
+  authnCheat: { title: 'OWASP: Authentication cheat sheet', url: 'https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html' },
+  authzCheat: { title: 'OWASP: Authorization cheat sheet', url: 'https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html' },
+  pwCheat: { title: 'OWASP: Password storage cheat sheet', url: 'https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html' },
+  nist: { title: 'NIST SP 800-63B-4: Authentication and authenticator management (2025)', url: 'https://pages.nist.gov/800-63-4/sp800-63b.html' },
+  passkeys: { title: 'passkeys.dev: Passkeys developer resources', url: 'https://passkeys.dev/' },
+  jwtRfc: { title: 'RFC 7519: JSON Web Token (JWT)', url: 'https://datatracker.ietf.org/doc/html/rfc7519' },
+  jwtBcp: { title: 'RFC 8725: JSON Web Token best current practices', url: 'https://datatracker.ietf.org/doc/html/rfc8725' },
+  jwe: { title: 'RFC 7516: JSON Web Encryption (JWE)', url: 'https://datatracker.ietf.org/doc/html/rfc7516' },
+  jwtIntro: { title: 'jwt.io: Introduction to JSON Web Tokens', url: 'https://jwt.io/introduction' },
+  sessCheat: { title: 'OWASP: Session management cheat sheet', url: 'https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html' },
+  h5Cheat: { title: 'OWASP: HTML5 security cheat sheet (local storage)', url: 'https://cheatsheetseries.owasp.org/cheatsheets/HTML5_Security_Cheat_Sheet.html' },
+  csrfCheat: { title: 'OWASP: Cross-site request forgery prevention cheat sheet', url: 'https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html' },
+  setCookie: { title: 'MDN: Set-Cookie', url: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie' },
+  oauthBcp: { title: 'RFC 9700: OAuth 2.0 security best current practice (2025)', url: 'https://datatracker.ietf.org/doc/html/rfc9700' },
+  pkce: { title: 'RFC 7636: Proof Key for Code Exchange (PKCE)', url: 'https://datatracker.ietf.org/doc/html/rfc7636' },
+  oidc: { title: 'OpenID Connect Core 1.0', url: 'https://openid.net/specs/openid-connect-core-1_0.html' },
+  oauthBrowser: { title: 'IETF draft: OAuth 2.0 for browser-based applications', url: 'https://datatracker.ietf.org/doc/draft-ietf-oauth-browser-based-apps/' },
   letsEncrypt: { title: 'Let\'s Encrypt: How it works', url: 'https://letsencrypt.org/how-it-works/' },
 }
 
@@ -1543,6 +1560,470 @@ There are also **key–value stores** like Redis, used as fast caches and for se
     ],
     related: ['eng-scaling-data', 'web-serve-dynamic'],
     sources: [SRC.postgres],
+  },
+  {
+    id: 'web-auth-basics',
+    unit: 'Logging in and permissions',
+    title: 'Authentication vs authorization',
+    summary: 'Proving who someone is and deciding what they may do are two separate checks, and both happen on the server.',
+    ideas: ['Who you are vs what you may do', '401 and 403', 'The server checks every request'],
+    body: `
+Two words that sound alike, and get mixed up constantly:
+
+## Who you are vs what you may do
+
+- **Authentication** (often "authn"): proving **who** you are. Logging in with a password, a passkey or "Sign in with Google" is authentication.
+- **Authorization** (often "authz"): deciding **what** you may do. "Can this user edit this document?" is authorization.
+
+Think of an office building. Your badge at the front door authenticates you. Whether that badge opens the server room is authorization. Being inside the building doesn't mean you can go everywhere.
+
+Authentication always comes first, because you can't decide what someone may do until you know who they are. But most serious security bugs are in the **second** step: OWASP ranks **broken access control** as the number one web risk. The app knew exactly who the user was and let them do something they shouldn't.
+
+## 401 and 403
+
+HTTP has a status code for each failure, and the names are confusingly historical:
+
+| Code | Name | Means |
+|---|---|---|
+| 401 | Unauthorized | Not authenticated: we don't know who you are. Log in. |
+| 403 | Forbidden | Authenticated, but not allowed to do this. |
+
+Some APIs return **404** instead of 403 for other people's data, so attackers can't even learn that a record exists.
+
+## The server checks every request
+
+HTTP is stateless: each request arrives on its own. So **every** request that touches protected data must answer both questions again: who sent this (by checking a session cookie or a token), and are they allowed to do this?
+
+Hiding the "Delete" button for non-admins is good design, but it's **not** security. Anyone can send \`DELETE /api/posts/7\` with curl or the browser's dev tools. The check that counts runs on the server.
+`,
+    takeaways: [
+      'Authentication proves who you are; authorization decides what you may do.',
+      '401 means "log in"; 403 means "logged in, but not allowed".',
+      'Check identity and permission on the server on every request; hidden buttons aren\'t security.',
+    ],
+    quiz: [
+      {
+        q: 'A logged-in user requests another customer\'s order and the API returns it. Which step failed?',
+        options: ['Authentication', 'Authorization', 'Encryption', 'DNS'],
+        answer: 1,
+        why: 'The server knew who they were; it didn\'t check they were allowed to see that order.',
+      },
+      {
+        q: 'A request arrives with no session cookie or token for a protected endpoint. Best status code?',
+        options: ['200', '401', '403', '500'],
+        answer: 1,
+        why: '401: the server doesn\'t know who you are.',
+      },
+      {
+        q: 'A logged-in viewer tries an admin-only action. Best status code?',
+        options: ['401', '403', '301', '204'],
+        answer: 1,
+        why: '403: authenticated, but not permitted.',
+      },
+      {
+        q: 'The admin button is hidden for normal users. Is the admin endpoint now safe?',
+        options: ['Yes', 'No: anyone can call the endpoint directly, so the server must check', 'Only on mobile', 'Yes, if the button is also disabled'],
+        answer: 1,
+        why: 'The UI is a convenience; the server is the security boundary.',
+      },
+    ],
+    cards: [
+      { id: 'c-web-auth-basics-1', front: 'Authentication vs authorization?', back: 'Authentication: proving who you are. Authorization: deciding what you may do.' },
+      { id: 'c-web-auth-basics-2', front: '401 vs 403?', back: '401: not authenticated (log in). 403: authenticated but not allowed.' },
+      { id: 'c-web-auth-basics-3', front: 'Is hiding a button security?', back: 'No. Anyone can call the endpoint directly, so the server must check permission on every request.' },
+    ],
+    inTheWild: [
+      'Your bank\'s app logs you in once, but every transfer is checked again on the server against the accounts you own.',
+    ],
+    related: ['web-session', 'web-security', 'web-permissions'],
+    sources: [SRC.authnCheat, SRC.authzCheat, SRC.status],
+  },
+  {
+    id: 'web-passwords',
+    unit: 'Logging in and permissions',
+    title: 'Storing passwords safely',
+    summary: 'Never store passwords, even encrypted. Store a slow, salted hash, and follow modern rules for what users may choose.',
+    ideas: ['Hash, don\'t encrypt', 'Slow hashes with a salt', 'Modern password rules'],
+    body: `
+## Hash, don't encrypt
+
+**Encryption** can be reversed by anyone holding the key. **Hashing** is one-way: you can compute the hash of a password, but you can't turn the hash back into the password.
+
+At login, the server hashes what the user typed and compares it with the stored hash. It never needs the original password, so it shouldn't keep one. If the database leaks, attackers get hashes, not passwords. Encrypted passwords would be one stolen key away from all of them.
+
+## Slow hashes with a salt
+
+Attackers who steal hashes **guess**: they hash billions of common passwords and look for matches. Two defences:
+
+- A **salt**: a random value stored with each hash and mixed in. Two people with the password \`sunshine1\` get different hashes, so one guess can't crack everyone at once.
+- A deliberately **slow** algorithm. Fast hashes like SHA-256 are built for speed, which helps attackers. Password hashing algorithms are tuned to be slow and memory-hungry.
+
+OWASP's current advice: use **Argon2id** (at least 19 MiB of memory, 2 iterations, 1 degree of parallelism). For older systems, **bcrypt** with a work factor of 10 or more (it only uses the first 72 bytes), or **PBKDF2** with 600,000 iterations where FIPS compliance is required. Libraries handle the salt for you:
+
+\`\`\`js
+const hash = await argon2.hash(password)        // store this
+const ok = await argon2.verify(hash, attempt)   // at login
+\`\`\`
+
+## Modern password rules
+
+NIST's 2025 guidelines (SP 800-63B-4) reversed a lot of old habits:
+
+- Minimum **15 characters** if the password is the only factor; **8** if it's part of multi-factor login. Allow at least 64.
+- **No** composition rules like "one uppercase, one symbol". They produce \`Password1!\`.
+- **No** forced periodic changes; only when there's evidence of compromise.
+- **Do** reject passwords on a blocklist of common and breached ones.
+
+Add **rate limiting** on login attempts and offer **multi-factor authentication** or **passkeys**, which replace passwords with a key pair stored on the device.
+`,
+    takeaways: [
+      'Store a one-way hash, never the password and never an encrypted password.',
+      'Use a slow, salted password hash: Argon2id, or bcrypt/PBKDF2 for older systems.',
+      'Prefer long passwords and a breached-password blocklist over composition rules and forced changes.',
+    ],
+    quiz: [
+      {
+        q: 'Why hash passwords instead of encrypting them?',
+        options: ['Hashes are shorter', 'Hashing is one-way, so a leaked database and key don\'t reveal passwords', 'Encryption is illegal', 'Hashes are faster to compute'],
+        answer: 1,
+        why: 'The server only needs to compare hashes; it never needs the original back.',
+      },
+      {
+        q: 'Why is plain SHA-256 a poor choice for passwords?',
+        options: ['It\'s broken', 'It\'s fast, so attackers can test billions of guesses', 'It\'s too slow', 'It can\'t handle long passwords'],
+        answer: 1,
+        why: 'Password hashes should be slow on purpose.',
+      },
+      {
+        q: 'What does a salt prevent?',
+        options: ['Slow logins', 'One guess cracking every user with the same password at once', 'Phishing', 'Typos'],
+        answer: 1,
+        why: 'Each user\'s hash differs, even for identical passwords.',
+      },
+      {
+        q: 'Which rule matches NIST\'s current guidance?',
+        options: ['Force a change every 90 days', 'Require a symbol and a number', 'Check new passwords against a list of breached ones', 'Maximum 12 characters'],
+        answer: 2,
+        why: 'Blocklists, length and rate limits replace composition rules and expiry.',
+      },
+    ],
+    practice: 'Look up which password hashing algorithm your framework or auth library uses by default, and what settings it uses.',
+    cards: [
+      { id: 'c-web-passwords-1', front: 'Hashing vs encryption for passwords?', back: 'Hashing is one-way: compare hashes at login. Encryption is reversible with a key, so never use it for passwords.' },
+      { id: 'c-web-passwords-2', front: 'OWASP\'s recommended password hash?', back: 'Argon2id (min 19 MiB memory, 2 iterations, parallelism 1). Older: bcrypt cost 10+, or PBKDF2 600,000 iterations.' },
+      { id: 'c-web-passwords-3', front: 'What is a salt?', back: 'A random value per password, stored with the hash, so identical passwords get different hashes.' },
+      { id: 'c-web-passwords-4', front: 'NIST password length rules (2025)?', back: 'At least 15 characters as a single factor, 8 with MFA; allow at least 64. No composition rules or forced rotation.' },
+    ],
+    related: ['web-auth-basics', 'web-security'],
+    sources: [SRC.pwCheat, SRC.nist, SRC.passkeys],
+  },
+  {
+    id: 'web-jwt',
+    unit: 'Logging in and permissions',
+    title: 'What\'s inside a JWT',
+    summary: 'A JWT is signed JSON anyone can read. The signature proves it\'s genuine; HTTPS keeps it private in transit.',
+    ideas: ['Three parts', 'Signed, not encrypted', 'Verifying a token properly'],
+    body: `
+A **JSON Web Token** (JWT, said "jot") is a compact way to carry claims like "this is user 42, valid until 10:15".
+
+## Three parts
+
+A JWT is three base64url-encoded pieces joined by dots: \`header.payload.signature\`.
+
+\`\`\`json
+// header
+{ "alg": "HS256", "typ": "JWT" }
+// payload: the "claims"
+{ "sub": "42", "role": "editor", "iss": "https://api.example", "aud": "web", "exp": 1798000000 }
+\`\`\`
+
+Standard claims include \`sub\` (who it's about), \`exp\` (expiry time), \`iss\` (who issued it) and \`aud\` (who it's for). The **signature** is computed over the header and payload with a key. HS256 uses one shared secret to sign and check; RS256 or ES256 sign with a private key and let anyone check with the public key, which suits several services.
+
+## Signed, not encrypted
+
+Base64 is **encoding**, not encryption. Paste any JWT into a decoder and you'll read the payload. The signature only proves the server issued it and nobody changed it.
+
+So how is a JWT sent to the frontend kept secret?
+
+- **HTTPS** encrypts it in transit, like everything else in the request.
+- **Put nothing secret in it.** IDs, roles and expiry are fine; emails, addresses or internal data are not.
+- **Store it carefully** in the browser (next lesson).
+
+Encrypted tokens do exist: **JWE** (five dot-separated parts). They're only needed when the token itself must carry confidential data past parties you don't trust, which is rare for logins.
+
+## Verifying a token properly
+
+Most JWT bugs come from checking too little. On every request, with a maintained library:
+
+- **Pin the algorithm** you expect. Never let the token's own \`alg\` header decide. Attackers have sent \`"alg": "none"\`, or tricked servers into checking an RS256 token as HS256 using the public key as the secret.
+- Check \`exp\`, and \`iss\` and \`aud\`, so a token for another app is rejected.
+- Use a long random secret, kept server-side.
+
+\`\`\`js
+jwt.verify(token, key, { algorithms: ['RS256'], issuer: 'https://api.example', audience: 'web' })
+\`\`\`
+`,
+    takeaways: [
+      'A JWT is header.payload.signature; the payload is readable by anyone holding it.',
+      'Signing proves who issued it; HTTPS protects it in transit; never put secrets in the payload.',
+      'Verify with a pinned algorithm and check exp, iss and aud on every request.',
+    ],
+    quiz: [
+      {
+        q: 'Someone copies a JWT from your app. Can they read the payload?',
+        options: ['No, it\'s encrypted', 'Yes, it\'s only base64url-encoded', 'Only with the private key', 'Only on the same domain'],
+        answer: 1,
+        why: 'Standard JWTs are signed, not encrypted.',
+      },
+      {
+        q: 'Can they change "role": "user" to "admin" in it?',
+        options: ['Yes, and it works', 'They can edit it, but the signature check will fail', 'Only if HTTPS is off', 'Only in the header'],
+        answer: 1,
+        why: 'Changing the payload invalidates the signature.',
+      },
+      {
+        q: 'What keeps a JWT private on its way from the server to the browser?',
+        options: ['Base64', 'The signature', 'HTTPS', 'The exp claim'],
+        answer: 2,
+        why: 'TLS encrypts the whole HTTP exchange.',
+      },
+      {
+        q: 'Why must the server pin which algorithms it accepts?',
+        options: ['Speed', 'An attacker could set alg to "none" or swap algorithms to forge tokens', 'To save memory', 'Browsers require it'],
+        answer: 1,
+        why: 'RFC 8725 calls this algorithm verification.',
+      },
+    ],
+    cards: [
+      { id: 'c-web-jwt-1', front: 'The three parts of a JWT?', back: 'Header (algorithm), payload (claims such as sub, exp, iss, aud) and signature, base64url-encoded and joined with dots.' },
+      { id: 'c-web-jwt-2', front: 'Is a JWT encrypted?', back: 'Normally no: it\'s signed. Anyone can read the payload; HTTPS protects it in transit. JWE is the rare encrypted form.' },
+      { id: 'c-web-jwt-3', front: 'What to check when verifying a JWT?', back: 'Signature with a pinned algorithm, plus exp, iss and aud.' },
+      { id: 'c-web-jwt-4', front: 'HS256 vs RS256?', back: 'HS256: one shared secret signs and verifies. RS256: private key signs, public key verifies, so other services can check without the secret.' },
+    ],
+    inTheWild: [
+      'Paste a token from your browser\'s dev tools into a JWT decoder (only a test account\'s!) and you\'ll see its claims in plain text.',
+    ],
+    related: ['web-session', 'web-tokens'],
+    sources: [SRC.jwtRfc, SRC.jwtBcp, SRC.jwtIntro, SRC.jwe],
+  },
+  {
+    id: 'web-tokens',
+    unit: 'Logging in and permissions',
+    title: 'Access tokens, refresh tokens and storage',
+    summary: 'Short-lived access tokens, refresh tokens to renew them, and storing them where scripts can\'t steal them.',
+    ideas: ['Short access, long refresh', 'Logging out a token', 'Where the browser keeps it'],
+    body: `
+## Short access, long refresh
+
+A signed token is valid until it expires, even if the user logs out or is banned. So systems usually issue two:
+
+- An **access token**: sent with each API request, short-lived (often 5 to 15 minutes).
+- A **refresh token**: long-lived, sent **only** to one endpoint to get a new access token. The server keeps a record of it, so it **can** be revoked.
+
+A stolen access token is useful only briefly. Each refresh is a chance for the server to say no.
+
+## Logging out a token
+
+Ways to end access before expiry:
+
+- **Revoke the refresh token** in the database. Access stops within one access-token lifetime.
+- **Rotate** refresh tokens: each use returns a new one and invalidates the old. If an old one is used again, someone copied it, so revoke the whole family.
+- Keep a **denylist** of token IDs (the \`jti\` claim) until they expire, for instant revocation.
+
+Notice how far that drifts from "no lookups". If you need instant logout everywhere, a plain **server session** (a random ID in a cookie, data on the server) is simpler, and fine for most single websites. Tokens shine when many services or mobile apps must verify a user without sharing a session store.
+
+## Where the browser keeps it
+
+| Where | Risk |
+|---|---|
+| localStorage | Any script on the page can read it, so one XSS bug leaks it. OWASP advises against it for session data. |
+| Memory (a JS variable) | Also readable by XSS, but gone on reload; pair with a refresh cookie. |
+| HttpOnly cookie | JavaScript can't read it at all. Sent automatically, so guard against CSRF. |
+
+The common recommendation for browser apps is an \`HttpOnly; Secure; SameSite=Lax\` (or \`Strict\`) cookie. \`SameSite\` stops most cross-site request forgery; add CSRF tokens for older browsers or risky actions. Current IETF guidance for browser apps goes further: a **backend for frontend** (BFF) holds the tokens on the server, and the browser gets only a session cookie.
+`,
+    takeaways: [
+      'Use short-lived access tokens and revocable refresh tokens, rotated on each use.',
+      'If you need instant logout and have one website, a server session is simpler than JWTs.',
+      'Keep tokens out of localStorage; prefer HttpOnly, Secure, SameSite cookies or a backend-for-frontend.',
+    ],
+    quiz: [
+      {
+        q: 'Why keep access tokens short-lived?',
+        options: ['They\'re cheaper', 'A stolen one only works briefly, since signed tokens can\'t easily be revoked', 'Browsers delete them', 'To make pages faster'],
+        answer: 1,
+        why: 'Short expiry limits the damage of theft.',
+      },
+      {
+        q: 'An old, already-rotated refresh token is used again. What should the server assume?',
+        options: ['A clock bug', 'It was stolen; revoke that token family', 'The user has two tabs; allow it', 'Nothing'],
+        answer: 1,
+        why: 'Reuse detection is the point of rotation.',
+      },
+      {
+        q: 'Why is localStorage risky for tokens?',
+        options: ['It\'s slow', 'Any JavaScript on the page, including injected scripts, can read it', 'It\'s cleared hourly', 'It\'s sent to every site'],
+        answer: 1,
+        why: 'One XSS bug is enough to steal it.',
+      },
+      {
+        q: 'A token is in an HttpOnly cookie. What new risk must you handle?',
+        options: ['XSS reading it', 'Cross-site request forgery, since the browser sends cookies automatically', 'DNS failures', 'CORS preflights'],
+        answer: 1,
+        why: 'SameSite and CSRF tokens address that.',
+      },
+    ],
+    cards: [
+      { id: 'c-web-tokens-1', front: 'Access token vs refresh token?', back: 'Access: short-lived, sent with every request. Refresh: long-lived, recorded on the server, used only to get new access tokens, and revocable.' },
+      { id: 'c-web-tokens-2', front: 'What is refresh token rotation?', back: 'Each refresh returns a new refresh token and invalidates the old; reuse of an old one signals theft.' },
+      { id: 'c-web-tokens-3', front: 'Best place for auth tokens in a browser app?', back: 'An HttpOnly, Secure, SameSite cookie, or a backend-for-frontend holding tokens server-side. Not localStorage.' },
+    ],
+    related: ['web-jwt', 'web-session', 'web-security'],
+    sources: [SRC.sessCheat, SRC.h5Cheat, SRC.csrfCheat, SRC.oauthBrowser, SRC.setCookie],
+  },
+  {
+    id: 'web-oauth',
+    unit: 'Logging in and permissions',
+    title: '"Sign in with Google": OAuth and OpenID Connect',
+    summary: 'OAuth lets an app act for you without your password; OpenID Connect adds "who is this user" on top.',
+    ideas: ['Delegation without passwords', 'The authorization code flow', 'ID tokens vs access tokens'],
+    body: `
+## Delegation without passwords
+
+Before OAuth, an app that wanted your contacts asked for your email password. Now the app sends you to the provider (Google, GitHub), **you** log in there and approve specific permissions ("scopes"), and the app gets a token limited to those scopes. It never sees your password, and you can revoke it later.
+
+- **OAuth 2.0** is about **authorization**: "this app may read your calendar".
+- **OpenID Connect** (OIDC) is a layer on top for **authentication**: "this user is alice@example.com, verified by Google". "Sign in with Google" is OIDC.
+
+## The authorization code flow
+
+The recommended flow for nearly every app:
+
+1. Your app redirects the browser to the provider with its client ID, the scopes it wants, a redirect URL, and a random \`state\` value.
+2. The user logs in and consents at the provider.
+3. The provider redirects back to your redirect URL with a short-lived **code**.
+4. Your **backend** swaps the code for tokens in a direct server-to-server call, using its client secret.
+
+Two protections are now expected (RFC 9700, the OAuth security best practice from 2025):
+
+- **PKCE**: the app makes a random secret, sends a hash of it in step 1 and the original in step 4. A stolen code is useless without it.
+- **Exact redirect URL matching**, so codes can't be sent to an attacker's site.
+
+The older **implicit flow**, which returned tokens straight in the URL, is deprecated.
+
+## ID tokens vs access tokens
+
+OIDC returns an **ID token**, a JWT describing the user (\`sub\`, \`email\`, \`iss\`, \`aud\`). Your app verifies it, then creates **its own** session. The **access token** is for calling the provider's APIs, not for logging into your app.
+
+In practice, use a well-maintained library or an identity service (Auth0, Clerk, Cognito, Keycloak) rather than hand-rolling these steps.
+`,
+    takeaways: [
+      'OAuth delegates limited access without sharing passwords; OIDC adds verified identity on top.',
+      'Use the authorization code flow with PKCE and exact redirect URLs; the implicit flow is deprecated.',
+      'Verify the ID token, then create your own session; use a library rather than hand-rolling it.',
+    ],
+    quiz: [
+      {
+        q: '"Sign in with Google" mainly uses which standard to tell your app who the user is?',
+        options: ['OAuth scopes only', 'OpenID Connect', 'CORS', 'SAML cookies'],
+        answer: 1,
+        why: 'OIDC adds the ID token and identity on top of OAuth.',
+      },
+      {
+        q: 'What does PKCE protect against?',
+        options: ['Slow logins', 'A stolen authorization code being exchanged by an attacker', 'XSS', 'SQL injection'],
+        answer: 1,
+        why: 'Only the app holding the original secret can redeem the code.',
+      },
+      {
+        q: 'Where should the authorization code be exchanged for tokens in a typical web app?',
+        options: ['In the browser URL', 'On your backend', 'In localStorage', 'At the DNS server'],
+        answer: 1,
+        why: 'The backend can keep the client secret and tokens away from the browser.',
+      },
+    ],
+    cards: [
+      { id: 'c-web-oauth-1', front: 'OAuth vs OpenID Connect?', back: 'OAuth: delegated authorization (an app may access something for you). OIDC: authentication layer on top, with an ID token saying who the user is.' },
+      { id: 'c-web-oauth-2', front: 'Steps of the authorization code flow?', back: 'Redirect to provider, user logs in and consents, provider redirects back with a code, backend exchanges the code (plus PKCE verifier) for tokens.' },
+      { id: 'c-web-oauth-3', front: 'ID token vs access token?', back: 'ID token: a JWT about the user, for your app to verify. Access token: for calling the provider\'s API.' },
+    ],
+    related: ['web-tokens', 'web-auth-basics'],
+    sources: [SRC.oauthBcp, SRC.pkce, SRC.oidc, SRC.oauthBrowser],
+  },
+  {
+    id: 'web-permissions',
+    unit: 'Logging in and permissions',
+    title: 'Checking permissions',
+    summary: 'Deny by default, check ownership on every object, and keep the rules in one place you can test.',
+    ideas: ['Deny by default', 'Roles and ownership', 'One place for the rules'],
+    body: `
+Authentication tells you who's asking. Now decide what they may do.
+
+## Deny by default
+
+Every route should be **closed unless a rule opens it**. New endpoints are the risky ones: someone adds \`GET /api/export\` and forgets the check. If the framework rejects requests with no explicit permission, forgetting fails safe.
+
+## Roles and ownership
+
+Two kinds of rule cover most apps:
+
+- **Roles** (role-based access control, RBAC): admins can delete any post; editors can publish; viewers can read.
+- **Ownership and attributes** (attribute-based, ABAC): you can edit **your own** post; a manager can approve expenses **in their team** under 1,000.
+
+Role checks alone miss the most common bug, where an ID in the URL is trusted:
+
+\`\`\`js
+// Broken: any logged-in user can read any invoice by changing the ID
+app.get('/api/invoices/:id', requireLogin, async (req, res) => {
+  res.json(await db.invoice.find(req.params.id))
+})
+
+// Fixed: the query itself includes the owner
+const invoice = await db.invoice.findFirst({ where: { id: req.params.id, userId: req.user.id } })
+if (!invoice) return res.status(404).end()
+\`\`\`
+
+This is called an **insecure direct object reference** (IDOR). Never trust IDs from the client to mean "theirs"; check on the server, for every object.
+
+## One place for the rules
+
+Scattered \`if (user.role === 'admin')\` checks drift apart. Put rules in one module or policy (for example \`can(user, 'edit', post)\`), call it from every route, and write **tests** for it: one test per rule that a forbidden user gets 403 or 404. Log denied attempts; a burst of them is often someone probing.
+
+Remember tokens carry roles as of when they were issued. If you demote someone, a token saying \`"role": "admin"\` stays valid until it expires, so either keep tokens short-lived or check important permissions against the database.
+`,
+    takeaways: [
+      'Deny by default so a forgotten check fails safe.',
+      'Check ownership of every object; never trust an ID from the client to mean "theirs".',
+      'Keep rules in one tested policy module; remember token roles can be out of date.',
+    ],
+    quiz: [
+      {
+        q: 'Changing `/orders/100` to `/orders/101` shows someone else\'s order. What is this?',
+        options: ['CORS', 'An insecure direct object reference (broken access control)', 'XSS', 'A cache bug'],
+        answer: 1,
+        why: 'The server didn\'t check the order belonged to the user.',
+      },
+      {
+        q: 'What does "deny by default" achieve?',
+        options: ['Faster responses', 'A route with a forgotten check is closed rather than open', 'Fewer logins', 'Better SEO'],
+        answer: 1,
+        why: 'Mistakes fail safe.',
+      },
+      {
+        q: 'A user is demoted from admin, but their 1-hour JWT says role: admin. What\'s true?',
+        options: ['They lose access instantly', 'They keep admin access until the token expires, unless you check the database', 'The token becomes invalid', 'The browser deletes it'],
+        answer: 1,
+        why: 'Signed claims are a snapshot from when the token was issued.',
+      },
+    ],
+    practice: 'Pick one API endpoint you\'ve written or used that takes an ID. Write down exactly where the code checks that the ID belongs to the caller.',
+    cards: [
+      { id: 'c-web-permissions-1', front: 'RBAC vs ABAC?', back: 'RBAC: permissions by role (admin, editor). ABAC: rules on attributes such as owner, team or amount.' },
+      { id: 'c-web-permissions-2', front: 'What is an IDOR?', back: 'Insecure direct object reference: the server trusts an ID from the client without checking the user may access that object.' },
+      { id: 'c-web-permissions-3', front: 'Why centralise permission rules?', back: 'Scattered checks drift and get forgotten; one tested policy module is consistent and deny-by-default.' },
+    ],
+    related: ['web-auth-basics', 'web-security'],
+    sources: [SRC.authzCheat, SRC.owaspTop10],
   },
   {
     id: 'web-dom-by-hand',

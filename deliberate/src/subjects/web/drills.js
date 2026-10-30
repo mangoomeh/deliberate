@@ -57,4 +57,38 @@ export const drills = [
     prompt: 'A Node server listens on `127.0.0.1:8000` on a cloud machine, behind Nginx on port 443. Users can reach the site. A teammate says the app should listen on `0.0.0.0` instead. Is that needed?',
     answer: 'No. Nginx runs on the same machine and connects to 127.0.0.1:8000, so listening locally is enough, and safer: the app isn\'t reachable from the internet except through the proxy, which handles TLS, limits and static files. Listening on 0.0.0.0 is needed when the proxy or load balancer is on a different machine or the app runs in a container, ideally with a firewall allowing only the proxy.',
   },
+  {
+    id: 'web-dr-9',
+    kind: 'code',
+    prompt: 'Your login API returns a JWT and the frontend saves it with `localStorage.setItem("token", jwt)`. A teammate asks how the token is "encrypted" on the way to the browser. What do you tell them, and would you change anything?',
+    answer: 'The JWT isn\'t encrypted: it\'s signed, and its payload is readable base64url. HTTPS encrypts it in transit, and the signature stops tampering. So keep secrets out of the payload. I would change the storage: localStorage is readable by any script, so one XSS bug leaks the token. Use an HttpOnly, Secure, SameSite cookie (with CSRF protection), or a backend-for-frontend that keeps tokens server-side, plus short-lived access tokens and revocable refresh tokens.',
+  },
+  {
+    id: 'web-dr-10',
+    kind: 'code',
+    prompt: 'A server verifies tokens with `jwt.verify(token, publicKey)` and accepts whatever algorithm the token\'s header names. What attack does this allow, and what\'s the fix?',
+    answer: 'Algorithm confusion: an attacker sets `alg` to `HS256` and signs a forged token using the public key (which is public) as the HMAC secret, or sets `alg` to `none`. A library that trusts the header may accept it. Fix: pin the expected algorithm, e.g. `{ algorithms: [\'RS256\'] }`, and also check exp, iss and aud (RFC 8725).',
+  },
+  {
+    id: 'web-dr-11',
+    kind: 'design',
+    prompt: 'Your product is one website with one backend. Support staff must be able to log a user out of every device immediately. Which approach fits best?',
+    options: ['Long-lived JWTs in localStorage', 'Server-side sessions: a random session ID in an HttpOnly cookie, deleted on logout', 'JWTs with a 30-day expiry', 'Basic auth on every request'],
+    answer: 1,
+    explanation: 'Deleting the session ends access instantly. JWTs would need a denylist, which brings the lookup back anyway.',
+  },
+  {
+    id: 'web-dr-12',
+    kind: 'code',
+    prompt: 'A signup form requires 8+ characters with an uppercase letter, a number and a symbol, and forces a change every 90 days. Passwords are stored as SHA-256 hashes. What would you change?',
+    answer: 'Hash with Argon2id (or bcrypt/PBKDF2 for legacy) with per-user salts, since SHA-256 is fast to brute-force. Follow NIST SP 800-63B-4: drop composition rules and forced rotation; require length (15+ as a single factor, 8+ with MFA, allow 64+); check against a breached-password blocklist; rate-limit login attempts; offer MFA or passkeys. Rehash existing users on their next login.',
+  },
+  {
+    id: 'web-dr-13',
+    kind: 'design',
+    prompt: 'Your app adds "Sign in with GitHub". Which flow should it use?',
+    options: ['Implicit flow: tokens come back in the URL fragment', 'Authorization code flow with PKCE, exchanging the code on your backend', 'Ask for the user\'s GitHub password', 'Client credentials flow'],
+    answer: 1,
+    explanation: 'RFC 9700 recommends the code flow with PKCE; implicit is deprecated, and you should never collect another site\'s password.',
+  },
 ]
