@@ -120,7 +120,7 @@ Rate limits have relatives you'll also meet:
         why: 'It limits simultaneous requests, regardless of how quickly they arrive.',
       },
     ],
-    inTheWild: ['GitHub, Stripe and OpenAI rate limit headers', 'p-limit and Bottleneck (Node)', 'Batch endpoints in most SaaS APIs'],
+    inTheWild: ['GitHub, Stripe and OpenAI rate limit headers', 'System.Threading.RateLimiting and SemaphoreSlim (.NET)', 'Batch endpoints in most SaaS APIs'],
     related: ['fg-rate-limiting', 'fg-background-jobs'],
     cards: [
       { id: 'c-fg-rlc-1', front: 'How do you stay under an API\'s rate limit during bulk work?', back: 'Queue the work and process it with workers capped at the allowed rate; batch and cache where possible.' },
@@ -138,12 +138,13 @@ Any list that can grow (orders, messages, users, logs) must be returned in **pag
 ## Offset pagination and its problems
 
 \`\`\`sql
-SELECT * FROM orders ORDER BY created_at DESC LIMIT 20 OFFSET 40;  -- page 3
+SELECT * FROM Orders ORDER BY CreatedAt DESC
+OFFSET 40 ROWS FETCH NEXT 20 ROWS ONLY;  -- page 3
 \`\`\`
 
 Easy to build, and it supports "jump to page 7". But:
 
-- **It gets slow.** \`OFFSET 1000000\` makes the database read and discard a million rows first.
+- **It gets slow.** \`OFFSET 1000000 ROWS\` makes the database read and discard a million rows first.
 - **It skips and repeats items.** If a new order arrives while someone is on page 1, everything shifts down one place, and page 2 repeats the last item of page 1. Deletions make items get skipped.
 
 ## Cursor pagination
@@ -151,15 +152,15 @@ Easy to build, and it supports "jump to page 7". But:
 Instead of "skip 40 rows", ask for "the rows **after** the last one I saw":
 
 \`\`\`sql
-SELECT * FROM orders
-WHERE (created_at, id) < ('2026-10-01T12:00:00Z', 'o_981')
-ORDER BY created_at DESC, id DESC
-LIMIT 20;
+SELECT TOP (20) * FROM Orders
+WHERE CreatedAt < @lastCreatedAt
+   OR (CreatedAt = @lastCreatedAt AND Id < @lastId)
+ORDER BY CreatedAt DESC, Id DESC;
 \`\`\`
 
 The API returns an opaque **cursor** encoding that last position, and the client sends it back for the next page. It's fast at any depth (with an index on the sort columns) and stable while data changes. It can't jump to an arbitrary page number, which feeds and infinite scroll don't need anyway.
 
-Always include a **unique tiebreaker** like \`id\` in the sort. Without it, rows with identical timestamps can be skipped or repeated across pages.
+Always include a **unique tiebreaker** like \`Id\` in the sort. Without it, rows with identical timestamps can be skipped or repeated across pages.
 
 ## Habits for paginated APIs
 
@@ -209,7 +210,7 @@ Time is one of the most reliable sources of bugs in software. A few rules preven
 
 ## Moments in UTC, sent as ISO 8601
 
-For **moments in time** (when an order was placed, when a token expires), store **UTC** in a proper timestamp type (\`timestamptz\` in PostgreSQL), and convert to the user's local time only when **displaying** it. Servers, databases and logs should all agree on UTC.
+For **moments in time** (when an order was placed, when a token expires), store **UTC** in a proper timestamp type (\`datetimeoffset\` or a UTC \`datetime2\` in SQL Server; \`DateTimeOffset\` in C#), and convert to the user's local time only when **displaying** it. Servers, databases and logs should all agree on UTC.
 
 Send times over APIs as **ISO 8601** with an explicit offset: \`2026-10-23T14:30:00Z\` (the Z means UTC) or \`2026-10-23T22:30:00+08:00\`. Never send something like \`10/11/12\`, which means different dates in different countries.
 
@@ -252,7 +253,7 @@ New York is \`-05:00\` in winter and \`-04:00\` in summer. Store the **zone name
         why: 'New York\'s offset is -05:00 in winter and -04:00 in summer.',
       },
     ],
-    inTheWild: ['ISO 8601 and RFC 3339', 'The IANA time zone database (tzdata)', 'PostgreSQL timestamptz and date'],
+    inTheWild: ['ISO 8601 and RFC 3339', 'The IANA time zone database (tzdata)', 'SQL Server datetimeoffset and date; .NET DateTimeOffset and DateOnly'],
     related: ['fg-time-bugs', 'fg-cron-time'],
     cards: [
       { id: 'c-fg-tm-1', front: 'How should you store a moment in time?', back: 'As UTC in a proper timestamp type, converting to local time only for display.' },
@@ -280,15 +281,15 @@ Do calendar arithmetic ("one day later", "next month") with a date library in th
 
 ## Measure durations with a monotonic clock
 
-Wall-clock time (\`Date.now()\`) can **jump**: the system corrects its clock from the network, or someone changes it. Measure a duration with it and you can get a negative or wildly wrong result.
+Wall-clock time (\`DateTime.UtcNow\`) can **jump**: the system corrects its clock from the network, or someone changes it. Measure a duration with it and you can get a negative or wildly wrong result.
 
-Use a **monotonic** clock for timing, one that only ever moves forward: \`performance.now()\` in JavaScript, \`time.monotonic()\` in Python.
+Use a **monotonic** clock for timing, one that only ever moves forward: \`Stopwatch\` in .NET (\`Stopwatch.StartNew()\`, then \`Elapsed\`), \`performance.now()\` in JavaScript.
 
 ## Pass "now" in, and use real date libraries
 
-Code that reads the clock internally is hard to test: how do you check what happens on 29 February, or at midnight on 31 December? Pass the current time in as a parameter (\`isExpired(token, now)\`), so tests can supply any moment they like.
+Code that reads the clock internally is hard to test: how do you check what happens on 29 February, or at midnight on 31 December? Pass the current time in (\`IsExpired(token, now)\`), or inject .NET's \`TimeProvider\` and use \`FakeTimeProvider\` in tests, so tests can supply any moment they like.
 
-And don't hand-roll date maths. Use your platform's modern tools: \`Temporal\` (or date-fns, Luxon) in JavaScript, \`java.time\`, Python's \`zoneinfo\`. Test with time zones far from your own, and around daylight-saving changes, month ends and leap days.
+And don't hand-roll date maths. Use your platform's tools: in .NET, \`DateTimeOffset\`, \`DateOnly\`, \`TimeZoneInfo.FindSystemTimeZoneById("America/New_York")\` (IANA names work on every OS since .NET 6), or the NodaTime library for serious calendar work. Test with time zones far from your own, and around daylight-saving changes, month ends and leap days.
 `,
     takeaways: [
       'Some local times don\'t exist and some repeat; "one day" isn\'t always 24 hours.',
@@ -298,7 +299,7 @@ And don't hand-roll date maths. Use your platform's modern tools: \`Temporal\` (
     quiz: [
       {
         q: 'Which clock should measure how long a request took?',
-        options: ['The wall clock (Date.now())', 'A monotonic clock (performance.now())', 'The database clock', 'The user\'s clock'],
+        options: ['The wall clock (DateTime.UtcNow)', 'A monotonic clock (Stopwatch)', 'The database clock', 'The user\'s clock'],
         answer: 1,
         why: 'Wall-clock time can jump when the system clock is corrected.',
       },
@@ -309,13 +310,13 @@ And don't hand-roll date maths. Use your platform's modern tools: \`Temporal\` (
         why: 'Those days are 23 or 25 hours long in local time.',
       },
       {
-        q: 'Why pass the current time into a function like `isExpired(token, now)`?',
-        options: ['It\'s faster', 'Tests can check any moment, like leap days or midnight, without changing the clock', 'Clocks are unreliable', 'It\'s required by JavaScript'],
+        q: 'Why pass the current time into a method like `IsExpired(token, now)`?',
+        options: ['It\'s faster', 'Tests can check any moment, like leap days or midnight, without changing the clock', 'Clocks are unreliable', 'It\'s required by C#'],
         answer: 1,
         why: 'Injecting "now" makes time-dependent logic testable.',
       },
     ],
-    inTheWild: ['JavaScript Temporal, date-fns-tz, Luxon', 'performance.now() and process.hrtime', 'Python zoneinfo and time.monotonic()'],
+    inTheWild: ['.NET TimeProvider and FakeTimeProvider', 'Stopwatch for timing', 'NodaTime and TimeZoneInfo'],
     related: ['fg-time', 'fg-cron-time'],
     cards: [
       { id: 'c-fg-tm-4', front: 'Which clock measures durations?', back: 'A monotonic clock (e.g. performance.now()), since wall-clock time can jump.' },

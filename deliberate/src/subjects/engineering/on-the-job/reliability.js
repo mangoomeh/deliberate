@@ -25,9 +25,15 @@ Fail readiness while the instance is warming up its caches, while it's shutting 
 
 "Has it finished booting?" Some apps take a minute to load data or connect to things. A **startup check** holds off the other checks until boot finishes, so a slow starter isn't restarted for being slow.
 
-\`\`\`js
-app.get('/healthz', (req, res) => res.sendStatus(200)) // liveness: can I respond at all?
-app.get('/readyz', (req, res) => res.sendStatus(isReady ? 200 : 503)) // readiness
+\`\`\`csharp
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"])
+    .AddCheck<WarmCacheCheck>("warm-cache", tags: ["ready"]);
+
+// liveness: can I respond at all?
+app.MapHealthChecks("/healthz", new() { Predicate = c => c.Tags.Contains("live") });
+// readiness: should I get traffic right now?
+app.MapHealthChecks("/readyz", new() { Predicate = c => c.Tags.Contains("ready") });
 \`\`\`
 `,
     takeaways: [
@@ -265,20 +271,24 @@ On Linux, platforms first send **SIGTERM**, a polite "please stop". After a **gr
 4. **Release resources**: close database connections, flush logs and metrics.
 5. **Exit** with code 0.
 
-\`\`\`js
-process.on('SIGTERM', async () => {
-  shuttingDown = true            // readiness now returns 503
-  await sleep(5000)              // let the load balancer stop routing to us
-  server.close()                 // stop accepting connections, finish open ones
-  await worker.stop({ timeoutMs: 15000 })
-  await db.end()
-  process.exit(0)
-})
+\`\`\`csharp
+// Total time allowed for shutdown; keep it under the platform's grace period.
+builder.Services.Configure<HostOptions>(o => o.ShutdownTimeout = TimeSpan.FromSeconds(25));
+var app = builder.Build();
+
+// ASP.NET Core handles SIGTERM itself and runs these callbacks first.
+app.Lifetime.ApplicationStopping.Register(() =>
+{
+    readiness.ShuttingDown = true;   // readiness now returns 503
+    Thread.Sleep(5000);              // let the load balancer stop routing to us
+});
+// Then the host stops Kestrel (open requests finish), cancels each
+// BackgroundService's stoppingToken, disposes services and exits with 0.
 \`\`\`
 
 ## Make sure your app hears the signal
 
-In containers, the first process (PID 1) receives the signal. If your app is started by a shell (\`sh -c "node app.js"\`), the shell may get SIGTERM and not pass it on. Your app never hears it and is killed mid-request. Use the exec form (\`CMD ["node", "app.js"]\`) or a tiny init process like tini.
+In containers, the first process (PID 1) receives the signal. If your app is started by a shell (\`sh -c "dotnet MyApp.dll"\`), the shell may get SIGTERM and not pass it on. Your app never hears it and is killed mid-request. Use the exec form (\`ENTRYPOINT ["dotnet", "MyApp.dll"]\`) or a tiny init process like tini.
 
 Jobs longer than the grace period can't finish in time. Make them **resumable** (save progress as you go) or **safe to retry**, and let the queue hand them out again.
 `,
@@ -301,13 +311,13 @@ Jobs longer than the grace period can't finish in time. Make them **resumable** 
         why: 'Stop new work arriving first, then finish what\'s in flight, then clean up.',
       },
       {
-        q: 'Your container starts the app with `sh -c "node app.js"` and it always gets killed at shutdown. A likely cause?',
-        options: ['Node can\'t handle signals', 'The shell receives SIGTERM and doesn\'t forward it', 'The grace period is too long', 'The image is too large'],
+        q: 'Your container starts the app with `sh -c "dotnet MyApp.dll"` and it always gets killed at shutdown. A likely cause?',
+        options: ['.NET can\'t handle signals', 'The shell receives SIGTERM and doesn\'t forward it', 'The grace period is too long', 'The image is too large'],
         answer: 1,
         why: 'The shell is PID 1. Use the exec form or a small init like tini.',
       },
     ],
-    inTheWild: ['Kubernetes terminationGracePeriodSeconds and preStop hooks', 'Node\'s server.close()', 'tini and dumb-init in Docker images'],
+    inTheWild: ['Kubernetes terminationGracePeriodSeconds and preStop hooks', 'ASP.NET Core IHostApplicationLifetime and HostOptions.ShutdownTimeout', 'tini and dumb-init in Docker images'],
     related: ['fg-health-checks', 'fg-queue-delivery'],
     cards: [
       { id: 'c-fg-gs-1', front: 'SIGTERM vs SIGKILL?', back: 'SIGTERM asks the process to stop and can be handled. SIGKILL ends it immediately and cannot be caught.' },
@@ -386,11 +396,11 @@ Reading data (GET) is safe to retry. Changing data is only safe to retry if the 
 
 Retrying immediately, in a tight loop, hammers a struggling service just when it needs relief. Instead, wait longer after each attempt: 100 ms, 200 ms, 400 ms, 800 ms, up to a cap.
 
-Then add **jitter**: a random part of the wait. Without it, a thousand clients that failed at the same moment all retry at the same moment, again and again, in synchronised waves called the **thundering herd**.
+Then add **jitter**: a random part of the wait. Without it, a thousand clients that failed at the same moment all retry at the same moment, again and again, in synchronised waves called the **thundering herd**. In .NET you rarely write this by hand: \`AddStandardResilienceHandler()\` (Microsoft.Extensions.Http.Resilience, built on Polly) adds timeouts, retries with jittered backoff and a circuit breaker to an HttpClient.
 
-\`\`\`js
-const ceiling = Math.min(capMs, baseMs * 2 ** attempt)
-await sleep(Math.random() * ceiling) // "full jitter"
+\`\`\`csharp
+var ceilingMs = Math.Min(capMs, baseMs * Math.Pow(2, attempt));
+await Task.Delay(TimeSpan.FromMilliseconds(Random.Shared.NextDouble() * ceilingMs)); // "full jitter"
 \`\`\`
 
 ## Retry at one layer
@@ -434,7 +444,7 @@ Users get a fast error or a fallback instead of a slow timeout, and the broken s
         why: 'An open breaker fails fast, giving the dependency room to recover.',
       },
     ],
-    inTheWild: ['Resilience4j (Java), Polly (.NET), opossum (Node)', 'Envoy and Istio outlier detection', 'AWS architecture guidance on backoff and jitter'],
+    inTheWild: ['Polly and Microsoft.Extensions.Http.Resilience (.NET), Resilience4j (Java)', 'Envoy and Istio outlier detection', 'AWS architecture guidance on backoff and jitter'],
     related: ['fg-timeouts', 'fg-rate-limit-clients'],
     cards: [
       { id: 'c-fg-rt-1', front: 'Why add jitter to backoff?', back: 'So clients that failed together don\'t retry together in synchronised waves (thundering herd).' },
@@ -529,12 +539,20 @@ The database can enforce "only once" for you:
 - A **unique constraint** on \`payments(order_id)\` makes a second insert fail instead of creating a second payment.
 - A **processed-events table** records each message or event ID you've handled. Check it, and record new IDs, in the same transaction as the work.
 
-\`\`\`js
-await db.transaction(async (tx) => {
-  const isNew = await tx.insertIgnoreDuplicate('processed_events', { id: event.id })
-  if (!isNew) return // seen it before
-  await tx.update('orders', { id: event.orderId }, { status: 'paid' })
-})
+\`\`\`csharp
+await using var tx = await db.Database.BeginTransactionAsync();
+try
+{
+    db.ProcessedEvents.Add(new ProcessedEvent { Id = evt.Id });  // primary key on Id
+    await db.SaveChangesAsync();
+}
+catch (DbUpdateException ex) when (IsDuplicateKey(ex))  // SQL error 2627 or 2601
+{
+    return; // seen it before
+}
+await db.Orders.Where(o => o.Id == evt.OrderId)
+    .ExecuteUpdateAsync(s => s.SetProperty(o => o.Status, "Paid"));
+await tx.CommitAsync();
 \`\`\`
 
 ## Absolute and conditional updates

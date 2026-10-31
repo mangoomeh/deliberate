@@ -54,8 +54,8 @@ export const drills = [
   {
     id: 'web-dr-8',
     kind: 'code',
-    prompt: 'A Node server listens on `127.0.0.1:8000` on a cloud machine, behind Nginx on port 443. Users can reach the site. A teammate says the app should listen on `0.0.0.0` instead. Is that needed?',
-    answer: 'No. Nginx runs on the same machine and connects to 127.0.0.1:8000, so listening locally is enough, and safer: the app isn\'t reachable from the internet except through the proxy, which handles TLS, limits and static files. Listening on 0.0.0.0 is needed when the proxy or load balancer is on a different machine or the app runs in a container, ideally with a firewall allowing only the proxy.',
+    prompt: 'An ASP.NET Core app (Kestrel) listens on `127.0.0.1:5000` on a cloud machine, behind Nginx on port 443. Users can reach the site. A teammate says the app should listen on `0.0.0.0` instead. Is that needed?',
+    answer: 'No. Nginx runs on the same machine and connects to 127.0.0.1:5000, so listening locally is enough, and safer: the app isn\'t reachable from the internet except through the proxy, which handles TLS, limits and static files. Listening on 0.0.0.0 is needed when the proxy or load balancer is on a different machine or the app runs in a container, ideally with a firewall allowing only the proxy.',
   },
   {
     id: 'web-dr-9',
@@ -66,8 +66,8 @@ export const drills = [
   {
     id: 'web-dr-10',
     kind: 'code',
-    prompt: 'A server verifies tokens with `jwt.verify(token, publicKey)` and accepts whatever algorithm the token\'s header names. What attack does this allow, and what\'s the fix?',
-    answer: 'Algorithm confusion: an attacker sets `alg` to `HS256` and signs a forged token using the public key (which is public) as the HMAC secret, or sets `alg` to `none`. A library that trusts the header may accept it. Fix: pin the expected algorithm, e.g. `{ algorithms: [\'RS256\'] }`, and also check exp, iss and aud (RFC 8725).',
+    prompt: 'A hand-written token check in an API reads the JWT\'s `alg` header and verifies the signature with whatever algorithm it names, using the public key. What attack does this allow, and what\'s the fix?',
+    answer: 'Algorithm confusion: an attacker sets `alg` to `HS256` and signs a forged token using the public key (which is public) as the HMAC secret, or sets `alg` to `none`. Fix: don\'t hand-roll it. Use ASP.NET Core\'s JWT bearer handler, which validates signature, lifetime, issuer and audience, and pin `TokenValidationParameters.ValidAlgorithms = ["RS256"]` (RFC 8725).',
   },
   {
     id: 'web-dr-11',
@@ -81,7 +81,7 @@ export const drills = [
     id: 'web-dr-12',
     kind: 'code',
     prompt: 'A signup form requires 8+ characters with an uppercase letter, a number and a symbol, and forces a change every 90 days. Passwords are stored as SHA-256 hashes. What would you change?',
-    answer: 'Hash with Argon2id (or bcrypt/PBKDF2 for legacy) with per-user salts, since SHA-256 is fast to brute-force. Follow NIST SP 800-63B-4: drop composition rules and forced rotation; require length (15+ as a single factor, 8+ with MFA, allow 64+); check against a breached-password blocklist; rate-limit login attempts; offer MFA or passkeys. Rehash existing users on their next login.',
+    answer: 'Use a slow, salted password hash instead of SHA-256, which is fast to brute-force: ASP.NET Core Identity\'s PasswordHasher (salted PBKDF2), or Argon2id. Follow NIST SP 800-63B-4: drop composition rules and forced rotation; require length (15+ as a single factor, 8+ with MFA, allow 64+); check against a breached-password blocklist; rate-limit login attempts; offer MFA or passkeys. Rehash existing users on their next login.',
   },
   {
     id: 'web-dr-13',

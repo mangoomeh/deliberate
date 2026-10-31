@@ -4,79 +4,76 @@ export const drills = [
   {
     id: 'ch-code-1',
     kind: 'code',
-    prompt: 'What is the time complexity of this function, and how would you improve it?',
-    code: `function hasDuplicate(arr) {
-  for (let i = 0; i < arr.length; i++) {
-    if (arr.indexOf(arr[i]) !== i) return true
-  }
-  return false
+    prompt: 'What is the time complexity of this method, and how would you improve it?',
+    code: `bool HasDuplicate(List<int> items)
+{
+    for (int i = 0; i < items.Count; i++)
+        if (items.IndexOf(items[i]) != i) return true;
+    return false;
 }`,
     answer:
-      'O(n²): indexOf is a linear scan inside a loop. Use a Set: `return new Set(arr).size !== arr.length` (O(n)), or add items to a Set and return early on the first repeat.',
+      'O(n²): IndexOf is a linear scan inside a loop. Use a HashSet: `return items.ToHashSet().Count != items.Count` (O(n)), or loop with `if (!seen.Add(item)) return true` to stop at the first repeat.',
   },
   {
     id: 'ch-code-2',
     kind: 'code',
-    prompt: 'This React component re-fetches in an infinite loop. Why?',
-    code: `function Profile({ id }) {
-  const [user, setUser] = useState(null)
-  const options = { headers: { id } }
-  useEffect(() => {
-    fetch('/api/user', options).then(r => r.json()).then(setUser)
-  }, [options])
-  return <p>{user?.name}</p>
-}`,
+    prompt: 'This endpoint works in testing, but under heavy load the server starts failing with socket errors. Why?',
+    code: `app.MapGet("/weather", async () =>
+{
+    using var client = new HttpClient();
+    return await client.GetStringAsync("https://api.weather.example/today");
+});`,
     answer:
-      '`options` is a new object on every render, so the effect\'s dependency always changes: fetch, setUser, re-render, new object, fetch again. Depend on `id` instead and build options inside the effect (or memoise them with useMemo).',
+      'Every request creates and disposes an HttpClient. Disposing it doesn\'t free its connection straight away: sockets linger (in TIME_WAIT), so heavy traffic can exhaust them, and nothing is reused. Reuse connections instead: register `builder.Services.AddHttpClient()` and inject `IHttpClientFactory` or a typed client, or share one long-lived HttpClient with `PooledConnectionLifetime` set so DNS changes are still picked up.',
   },
   {
     id: 'ch-code-3',
     kind: 'code',
-    prompt: 'What does this log, and why?',
-    code: `for (var i = 0; i < 3; i++) {
-  setTimeout(() => console.log(i), 0)
-}`,
+    prompt: 'What does this print, and why?',
+    code: `var actions = new List<Action>();
+for (int i = 0; i < 3; i++)
+    actions.Add(() => Console.WriteLine(i));
+foreach (var action in actions) action();`,
     answer:
-      'It logs 3, 3, 3. `var` is function-scoped, so all three callbacks share one `i`, which is 3 by the time they run. Using `let` creates a new binding per iteration and logs 0, 1, 2.',
+      'It prints 3, 3, 3. A `for` loop has a single variable `i`, shared by every lambda, and it is 3 by the time they run. Copy it inside the loop (`var copy = i;`) and capture the copy, or loop with `foreach (var i in Enumerable.Range(0, 3))`: since C# 5, each `foreach` iteration gets a fresh variable, so it prints 0, 1, 2.',
   },
   {
     id: 'ch-code-4',
     kind: 'code',
-    prompt: 'Find the bug.',
-    code: `function average(nums) {
-  let total = 0
-  for (const n of nums) total += n
-  return total / nums.length
+    prompt: 'Find the bugs.',
+    code: `double Average(List<int> nums)
+{
+    int total = 0;
+    foreach (var n in nums) total += n;
+    return total / nums.Count;
 }`,
     answer:
-      'An empty array returns NaN (0 / 0). Decide what an empty input should mean (return 0, null, or throw) and handle it explicitly. Edge cases like empty input are where bugs hide.',
+      'Two bugs. `total / nums.Count` is integer division, so the average of 1 and 2 is 1, not 1.5; convert first: `(double)total / nums.Count`. And an empty list throws DivideByZeroException. Decide what empty input should mean (return 0, return `double?` null, or throw a clear ArgumentException) and handle it explicitly. (LINQ\'s `nums.Average()` throws InvalidOperationException on an empty list.) For very large inputs, `int total` can also overflow; use `long`.',
   },
   {
     id: 'ch-code-5',
     kind: 'code',
     prompt: 'Two requests run this at the same moment for an account with balance 100. What can go wrong?',
-    code: `async function withdraw(accountId, amount) {
-  const acct = await db.get(accountId)
-  if (acct.balance < amount) throw new Error('Insufficient funds')
-  await db.update(accountId, { balance: acct.balance - amount })
+    code: `async Task WithdrawAsync(int accountId, decimal amount)
+{
+    var account = await db.Accounts.FindAsync(accountId);
+    if (account!.Balance < amount) throw new InvalidOperationException("Insufficient funds");
+    account.Balance -= amount;
+    await db.SaveChangesAsync();
 }`,
     answer:
-      'A race condition (check-then-act). Both requests read 100, both pass the check, and both write. Two withdrawals of 80 can both succeed, and one update overwrites the other. Fix with an atomic conditional update (`UPDATE ... SET balance = balance - 80 WHERE id = ? AND balance >= 80`), a transaction with row locking, or optimistic concurrency (version numbers).',
+      'A race condition (check-then-act). Both requests read 100, both pass the check, and both save. Two withdrawals of 80 can both succeed, and one update overwrites the other. Fix with an atomic conditional update (`await db.Accounts.Where(a => a.Id == accountId && a.Balance >= amount).ExecuteUpdateAsync(s => s.SetProperty(a => a.Balance, a => a.Balance - amount))`, then check that 1 row changed), or optimistic concurrency: a `[Timestamp]` rowversion property makes the second SaveChanges throw DbUpdateConcurrencyException.',
   },
   {
     id: 'ch-code-6',
     kind: 'code',
-    prompt: 'What is wrong with this way of updating state?',
-    code: `function TodoList() {
-  const [todos, setTodos] = useState([])
-  function add(text) {
-    todos.push({ text })
-    setTodos(todos)
-  }
-  // ...
+    prompt: 'What is wrong with this method?',
+    code: `public async void SendWelcomeEmail(User user)
+{
+    await mailer.SendAsync(user.Email, "Welcome!");
 }`,
     answer:
-      'It mutates the existing array and passes the same reference back, so React sees no change and may not re-render. Create a new array: `setTodos(prev => [...prev, { text }])`. The updater form also avoids stale-state bugs.',
+      '`async void` can\'t be awaited, so callers can\'t know when it has finished, and an exception thrown inside it can\'t be caught by the caller: it is raised on the synchronization context and can crash the process. Return a Task instead (`public async Task SendWelcomeEmailAsync(User user)`) and await it. Keep async void for event handlers only.',
   },
   {
     id: 'ch-design-1',

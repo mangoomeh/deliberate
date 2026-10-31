@@ -62,7 +62,7 @@ And **never log secrets or personal data**: passwords, tokens, full card numbers
         why: 'Logs are widely copied and kept for a long time; secrets in them leak.',
       },
     ],
-    inTheWild: ['pino and winston (Node), structlog (Python), Serilog (.NET)', 'Loki, Elasticsearch/OpenSearch, Datadog Logs', 'The W3C traceparent header'],
+    inTheWild: ['Serilog and ILogger message templates (.NET), structlog (Python)', 'Loki, Elasticsearch/OpenSearch, Datadog Logs', 'The W3C traceparent header'],
     related: ['fg-metrics', 'fg-traces'],
     cards: [
       { id: 'c-fg-ob-2', front: 'Why use structured (JSON) logs?', back: 'Fields can be searched, filtered and aggregated; free text can\'t, reliably.' },

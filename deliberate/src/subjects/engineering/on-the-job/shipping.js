@@ -18,20 +18,22 @@ The widely followed **twelve-factor app** guidance says to keep config in **envi
 
 Read all config **once, at startup**, check it, and **fail fast** with a clear message if something required is missing:
 
-\`\`\`js
-function required(name) {
-  const value = process.env[name]
-  if (!value) throw new Error(\`Missing required environment variable \${name}\`)
-  return value
+\`\`\`csharp
+public class PaymentsOptions
+{
+    [Required] public string ApiKey { get; set; } = "";
+    [Range(1, 60)] public int TimeoutSeconds { get; set; } = 10;
 }
 
-const config = {
-  port: Number(process.env.PORT ?? 3000),
-  databaseUrl: required('DATABASE_URL'),
-}
+// Reads the "Payments" section: appsettings.json, then environment
+// variables such as Payments__ApiKey, which override it.
+builder.Services.AddOptions<PaymentsOptions>()
+    .BindConfiguration("Payments")
+    .ValidateDataAnnotations()
+    .ValidateOnStart();   // a missing ApiKey stops startup, not the first payment
 \`\`\`
 
-A service that refuses to start with "Missing DATABASE_URL" is easy to fix. One that starts fine and fails on the first real request at 3 a.m. is not.
+A service that refuses to start with "Payments:ApiKey field is required" is easy to fix. One that starts fine and fails on the first real request at 3 a.m. is not.
 
 ## Frontend variables are public
 
@@ -47,7 +49,7 @@ Only put public values there (an API's address, a public analytics key). Anythin
     quiz: [
       {
         q: 'Why read and validate configuration at startup?',
-        options: ['It makes the app faster', 'A missing setting fails immediately and clearly, not on the first request in production', 'Environment variables expire', 'Node requires it'],
+        options: ['It makes the app faster', 'A missing setting fails immediately and clearly, not on the first request in production', 'Environment variables expire', '.NET requires it'],
         answer: 1,
         why: 'Failing fast at boot is far easier to diagnose than a failure hours later.',
       },
@@ -145,11 +147,11 @@ A service that only reads from a bucket shouldn't hold a key that can delete it.
 
 A **feature flag** is a runtime switch around new behaviour:
 
-\`\`\`js
-if (flags.isEnabled('new-checkout', { userId: user.id })) {
-  return renderNewCheckout()
-}
-return renderOldCheckout()
+\`\`\`csharp
+// Microsoft.FeatureManagement
+if (await features.IsEnabledAsync("NewCheckout", new TargetingContext { UserId = user.Id }))
+    return RenderNewCheckout();
+return RenderOldCheckout();
 \`\`\`
 
 The key idea: **deploying** code and **releasing** a feature become separate steps. You can merge unfinished work to main and deploy it hidden behind a flag, then release it later with a switch instead of a deploy. Teams use this to merge small changes every day instead of keeping long-lived branches.
@@ -248,7 +250,7 @@ It's slower than one big change, but every step works while traffic flows, and e
         why: 'Expand first, so both versions keep working. Dropping comes last.',
       },
     ],
-    inTheWild: ['Flyway, Liquibase, Alembic, Prisma Migrate, Rails and Django migrations', 'strong_migrations (Rails) and squawk (Postgres migration linting)'],
+    inTheWild: ['EF Core migrations, Flyway, Liquibase, DbUp', 'Reviewing generated SQL with dotnet ef migrations script'],
     related: ['fg-migrations-big-tables', 'fg-rollbacks'],
     cards: [
       { id: 'c-fg-mg-1', front: 'Why can\'t you rename a column in one step during a live deploy?', back: 'Old code still running expects the old name and starts failing the moment the migration runs.' },
@@ -265,7 +267,7 @@ It's slower than one big change, but every step works while traffic flows, and e
 
 On a table with millions of rows, some operations take a lock that blocks reads or writes until they finish, which can be minutes. To your users, that's an outage.
 
-- **Creating an index** normally blocks writes for as long as it takes to build. In PostgreSQL, use \`CREATE INDEX CONCURRENTLY\`, which builds it without blocking (it's slower, and can't run inside a transaction).
+- **Creating an index** normally blocks writes for as long as it takes to build. In SQL Server, use \`WITH (ONLINE = ON)\` (available in Enterprise edition and Azure SQL), which keeps the table usable while the index builds.
 - **Changing a column's type**, and on some databases and versions **adding a column with a default**, can rewrite the entire table. Check your database's documentation for each change.
 
 Test risky migrations on a copy of production-sized data first. A migration that takes 50 ms on your laptop's 100 rows can take 20 minutes on 200 million.
@@ -277,9 +279,9 @@ Filling a new column for every row with one \`UPDATE\` holds locks for the whole
 Update in **batches** of a few thousand rows, with a short pause between batches, so normal traffic keeps flowing:
 
 \`\`\`sql
-UPDATE users SET full_name = name
-WHERE id IN (SELECT id FROM users WHERE full_name IS NULL LIMIT 5000);
--- repeat until no rows change
+UPDATE TOP (5000) Users SET FullName = Name
+WHERE FullName IS NULL;
+-- repeat until @@ROWCOUNT is 0
 \`\`\`
 
 Keep backfills separate from schema migrations, so a slow backfill doesn't hold up a deploy.
@@ -288,7 +290,7 @@ Keep backfills separate from schema migrations, so a slow backfill doesn't hold 
 
 Even a quick change needs a lock. If a long-running query already holds the table, the migration waits, and every new query queues behind the waiting migration. A two-second change can freeze the table.
 
-Set a **lock timeout** for migrations (for example \`SET lock_timeout = '5s'\` in PostgreSQL), so a blocked migration fails fast and can be retried, instead of freezing everything.
+Set a **lock timeout** for migrations (for example \`SET LOCK_TIMEOUT 5000;\` in SQL Server, in milliseconds), so a blocked migration fails fast and can be retried, instead of freezing everything.
 `,
     takeaways: [
       'Index concurrently, and check which changes rewrite or lock large tables.',
@@ -297,8 +299,8 @@ Set a **lock timeout** for migrations (for example \`SET lock_timeout = '5s'\` i
     ],
     quiz: [
       {
-        q: 'How do you add an index to a large PostgreSQL table without blocking writes?',
-        options: ['CREATE INDEX', 'CREATE INDEX CONCURRENTLY', 'Add it at night', 'You can\'t'],
+        q: 'How do you add an index to a large SQL Server table without blocking writes?',
+        options: ['CREATE INDEX', 'CREATE INDEX ... WITH (ONLINE = ON)', 'Add it at night', 'You can\'t'],
         answer: 1,
         why: 'The concurrent build avoids holding a write-blocking lock.',
       },
@@ -315,10 +317,10 @@ Set a **lock timeout** for migrations (for example \`SET lock_timeout = '5s'\` i
         why: 'A waiting migration blocks new queries; a timeout limits the damage.',
       },
     ],
-    inTheWild: ['PostgreSQL CREATE INDEX CONCURRENTLY and lock_timeout', 'gh-ost and pt-online-schema-change for MySQL', 'strong_migrations and squawk'],
+    inTheWild: ['SQL Server ONLINE = ON and RESUMABLE = ON index builds', 'SET LOCK_TIMEOUT', 'gh-ost for MySQL'],
     related: ['fg-migrations'],
     cards: [
-      { id: 'c-fg-mg-3', front: 'How do you add an index in Postgres without blocking writes?', back: 'CREATE INDEX CONCURRENTLY.' },
+      { id: 'c-fg-mg-3', front: 'How do you add an index in SQL Server without blocking writes?', back: 'CREATE INDEX ... WITH (ONLINE = ON), on editions that support it (Enterprise, Azure SQL).' },
       { id: 'c-fg-mbt-1', front: 'Why set a lock timeout on migrations?', back: 'A migration waiting for a lock makes every new query queue behind it; a timeout makes it fail fast instead.' },
     ],
   },

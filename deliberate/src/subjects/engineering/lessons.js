@@ -73,11 +73,12 @@ The same goes for variables called \`data\`, \`info\` or \`temp\`: either the th
 
 A function should do one thing at one level of detail. Mixing "add up the items", "apply the discount" and "round to cents" in one block makes the reader hold all three in their head at once.
 
-\`\`\`js
-function checkout(cart) {
-  const subtotal = sumItems(cart.items)
-  const total = applyDiscount(subtotal, cart.user)
-  return roundToCents(total)
+\`\`\`csharp
+decimal Checkout(Cart cart)
+{
+    var subtotal = SumItems(cart.Items);
+    var total = ApplyDiscount(subtotal, cart.User);
+    return RoundToCents(total);
 }
 \`\`\`
 
@@ -87,11 +88,12 @@ Each step now has a name. The function that calls them is still "one job": its j
 
 Handle the edge cases first and return early, so the main logic isn't buried under layers of \`if\`:
 
-\`\`\`js
-function sendReminder(user) {
-  if (!user.email) return
-  if (user.unsubscribed) return
-  mailer.send(user.email, reminderTemplate(user))
+\`\`\`csharp
+void SendReminder(User user)
+{
+    if (user.Email is null) return;
+    if (user.Unsubscribed) return;
+    mailer.Send(user.Email, ReminderTemplate(user));
 }
 \`\`\`
 
@@ -101,9 +103,9 @@ The reader sees immediately when nothing happens, then reads the real work witho
 
 The code already says **what** it does. Comments are for what the code can't say: the business rule, the workaround for a library bug, the reason the obvious approach doesn't work.
 
-\`\`\`js
+\`\`\`csharp
 // Stripe retries webhooks for up to 3 days, so we dedupe by event id.
-if (await alreadyProcessed(event.id)) return
+if (await AlreadyProcessedAsync(stripeEvent.Id)) return;
 \`\`\`
 
 A comment that repeats the code ("increment i") goes stale and starts lying. A comment that records a decision stays useful.
@@ -282,14 +284,16 @@ Tests exist to give you **confidence to change code**. A suite that breaks on ev
 
 ## Test behaviour, not implementation
 
-Check what a caller or user can **observe**: return values, rendered text, saved records, emails sent. Avoid checking private details like internal state or which helper got called. Then you can restructure the code freely, and tests fail only when behaviour actually changes.
+Check what a caller or user can **observe**: return values, responses, saved records, emails sent. Avoid checking private details like internal state or which helper got called. Then you can restructure the code freely, and tests fail only when behaviour actually changes.
 
-\`\`\`js
-// Brittle: tied to internal state
-expect(component.state.items.length).toBe(3)
+\`\`\`csharp
+// Brittle: tied to how it works inside
+repository.Verify(r => r.LoadAllOrders(), Times.Once());
+Assert.Equal(3, service.CachedOrders.Count);
 
-// Robust: tied to what the user sees
-expect(screen.getAllByRole('listitem')).toHaveLength(3)
+// Robust: tied to what a caller observes
+var open = await service.GetOpenOrdersAsync(customerId);
+Assert.Equal(3, open.Count);
 \`\`\`
 
 > A sign you're testing implementation: a refactor that changes no behaviour breaks dozens of tests.
@@ -298,12 +302,14 @@ expect(screen.getAllByRole('listitem')).toHaveLength(3)
 
 Structure each test in three visible parts:
 
-\`\`\`js
-test('gold users get 10% off orders over $100', () => {
-  const cart = makeCart({ tier: 'gold', items: [{ price: 120 }] }) // arrange
-  const total = checkout(cart)                                     // act
-  expect(total).toBe(108)                                          // assert
-})
+\`\`\`csharp
+[Fact]
+public void Gold_users_get_10_percent_off_orders_over_100()
+{
+    var cart = MakeCart(tier: Tier.Gold, prices: [120m]);   // arrange
+    var total = Checkout(cart);                             // act
+    Assert.Equal(108m, total);                              // assert
+}
 \`\`\`
 
 - **One behaviour per test**, so a failure tells you exactly what broke.
@@ -470,11 +476,11 @@ Big-O describes how the work an algorithm does **grows** as the input grows. It 
     body: `
 ## Hidden loops
 
-\`includes\`, \`indexOf\`, \`find\` and \`filter\` all look like single operations, but each one is a loop over the whole array. Put one inside another loop and you have O(n²) without writing a nested loop.
+On a \`List<T>\`, \`Contains\`, \`IndexOf\`, \`First\` and LINQ's \`Where\` all look like single operations, but each one is a loop over the whole list. Put one inside another loop and you have O(n²) without writing a nested loop.
 
-\`\`\`js
+\`\`\`csharp
 // For each order, scan every user: O(n × m)
-orders.map(o => users.find(u => u.id === o.userId))
+orders.Select(o => users.First(u => u.Id == o.UserId))
 \`\`\`
 
 With 10,000 orders and 10,000 users, that's up to 100,000,000 comparisons. It's fast in development with 20 rows and painfully slow in production.
@@ -485,35 +491,35 @@ Watch for array methods inside loops, and for **database queries or API calls in
 
 The usual fix: build a lookup structure once, then use it.
 
-\`\`\`js
-// Build a Map once (O(m)), then each lookup is O(1): O(n + m) overall
-const byId = new Map(users.map(u => [u.id, u]))
-orders.map(o => byId.get(o.userId))
+\`\`\`csharp
+// Build a Dictionary once (O(m)), then each lookup is O(1): O(n + m) overall
+var byId = users.ToDictionary(u => u.Id);
+orders.Select(o => byId[o.UserId])
 \`\`\`
 
-Now it's about 20,000 operations instead of 100,000,000. The Map costs extra **memory**, which is almost always worth it, but it is a trade. For database loops, the equivalent is one query that fetches everything at once instead of one query per item.
+Now it's about 20,000 operations instead of 100,000,000. The dictionary costs extra **memory**, which is almost always worth it, but it is a trade. For database loops, the equivalent is one query that fetches everything at once instead of one query per item.
 
 ## Measure before optimising
 
 Big-O tells you where to **look**. A profiler tells you what's **actually** slow. Before rewriting anything, time it or profile it with realistic data. Code that's O(n²) over a list that never has more than 10 items is fine; the slow part is often somewhere you didn't expect.
 `,
     takeaways: [
-      'find, includes, indexOf and queries inside a loop are hidden nested loops.',
-      'Build a Map or Set once to turn repeated O(n) lookups into O(1).',
+      'First, Contains, IndexOf, Where and queries inside a loop are hidden nested loops.',
+      'Build a Dictionary or HashSet once to turn repeated O(n) lookups into O(1).',
       'Measure with realistic data before optimising.',
     ],
     quiz: [
       {
-        q: 'What is the time complexity of calling `arr.includes(x)` for every x in `arr`?',
+        q: 'What is the time complexity of calling `list.Contains(x)` for every x in a `List<T>`?',
         options: ['O(n)', 'O(log n)', 'O(n²)', 'O(1)'],
         answer: 2,
-        why: '`includes` is a linear scan, and it runs once per element: n × n.',
+        why: '`List.Contains` is a linear scan, and it runs once per element: n × n.',
       },
       {
         q: 'How do you usually speed up repeated lookups by id inside a loop?',
-        options: ['Sort the array each time', 'Build a Map from id to item once, before the loop', 'Use a for loop instead of map', 'Add more servers'],
+        options: ['Sort the array each time', 'Build a Dictionary from id to item once, before the loop', 'Use a for loop instead of Select', 'Add more servers'],
         answer: 1,
-        why: 'A Map lookup is O(1), so the total drops from O(n × m) to O(n + m).',
+        why: 'A dictionary lookup is O(1), so the total drops from O(n × m) to O(n + m).',
       },
       {
         q: 'A function is O(n²) but n is never more than 10. What should you do?',
@@ -523,7 +529,7 @@ Big-O tells you where to **look**. A profiler tells you what's **actually** slow
       },
     ],
     practice:
-      'Search your code for find, includes, filter or a database call inside a loop. Write down its complexity and how a Map, a Set or a single query could change it.',
+      'Search your code for First, Contains, Where or a database call inside a loop. Write down its complexity and how a Dictionary, a HashSet or a single query could change it.',
     cards: [
       { id: 'c-eng-bo-2', front: 'Why is `list.find()` inside `map()` often slow?', back: 'find is O(n), so inside a loop it becomes O(n·m). Precompute a Map for O(1) lookups.' },
       { id: 'c-eng-sc-1', front: 'Why measure before optimising?', back: 'Big-O shows where to look; a profiler with realistic data shows what\'s actually slow.' },
@@ -543,9 +549,9 @@ Picking the structure that matches how you **access** data usually matters more 
 ## Lists vs maps
 
 - An **array (list)** keeps items **in order**, with fast access by position and fast adding to the end. Searching it for a value is O(n): it checks every item.
-- A **hash map** (\`Map\`, a Python \`dict\`, an object) stores **key → value** pairs with O(1) average lookup, insert and delete.
+- A **hash map** (C#'s \`Dictionary<TKey, TValue>\`, Python's \`dict\`, JavaScript's \`Map\`) stores **key → value** pairs with O(1) average lookup, insert and delete.
 
-> If you find yourself writing \`items.find(i => i.id === id)\` over and over, you wanted a map keyed by id.
+> If you find yourself writing \`items.First(i => i.Id == id)\` over and over, you wanted a dictionary keyed by id.
 
 Use a list when order matters or you mostly loop over everything. Use a map when you mostly look things up by a key.
 
@@ -553,12 +559,12 @@ Use a list when order matters or you mostly loop over everything. Use a map when
 
 A **set** stores unique values and answers "is this in here?" in O(1).
 
-\`\`\`js
-const taken = new Set(['alice', 'bob'])
-taken.has('alice')   // true, instantly, however big the set is
+\`\`\`csharp
+var taken = new HashSet<string> { "alice", "bob" };
+taken.Contains("alice");   // true, instantly, however big the set is
 \`\`\`
 
-Sets also remove duplicates for free: \`new Set(emails).size\` is the number of unique emails. Use one whenever you'd otherwise check \`array.includes(x)\` repeatedly.
+Sets also remove duplicates for free: \`emails.ToHashSet().Count\` is the number of unique emails. Use one whenever you'd otherwise call \`list.Contains(x)\` repeatedly.
 `,
     takeaways: [
       'List the operations you need, then pick the structure that makes them fast.',
@@ -568,19 +574,19 @@ Sets also remove duplicates for free: \`new Set(emails).size\` is the number of 
     quiz: [
       {
         q: 'You need to check, many times a second, whether a username is already taken. Best choice?',
-        options: ['Array', 'Set', 'Sorted array', 'String'],
+        options: ['List', 'HashSet', 'Sorted list', 'String'],
         answer: 1,
-        why: 'Set membership is O(1) on average; an array check is O(n).',
+        why: 'HashSet membership is O(1) on average; a list check is O(n).',
       },
       {
         q: 'You keep looking up products by their SKU. Which structure fits best?',
-        options: ['An array of products', 'A map from SKU to product', 'A set of SKUs', 'A string of SKUs'],
+        options: ['A list of products', 'A dictionary from SKU to product', 'A set of SKUs', 'A string of SKUs'],
         answer: 1,
-        why: 'A map gives O(1) lookup by key.',
+        why: 'A dictionary gives O(1) lookup by key.',
       },
       {
         q: 'What is the simplest way to count unique values in an array?',
-        options: ['Sort it and count', 'new Set(arr).size', 'A nested loop', 'arr.length'],
+        options: ['Sort it and count', 'list.ToHashSet().Count', 'A nested loop', 'list.Count'],
         answer: 1,
         why: 'A set keeps only unique values.',
       },
@@ -604,7 +610,7 @@ Sets also remove duplicates for free: \`new Set(emails).size\` is the number of 
 - A **stack** is last in, first out, like a pile of plates. Uses: undo history, matching brackets, the call stack, depth-first search.
 - A **queue** is first in, first out, like a line at a shop. Uses: processing jobs in arrival order, breadth-first search.
 
-> In JavaScript, \`array.shift()\` (removing from the front) is O(n), because every other item moves. For a large queue, keep an index of the front instead, or use a proper queue structure.
+> In C#, \`list.RemoveAt(0)\` (removing from the front of a \`List<T>\`) is O(n), because every other item moves. Use \`Queue<T>\`, whose \`Dequeue()\` is O(1). .NET also has \`Stack<T>\`, and \`PriorityQueue<TElement, TPriority>\` for a heap.
 
 ## Heaps for "most urgent" and "top k"
 
@@ -1042,7 +1048,7 @@ Useful commands for reading history: \`git log -p path/to/file\` (how did this f
     quiz: [
       {
         q: 'Which commit message is best?',
-        options: ['fixed stuff', 'WIP', 'Fix timezone bug in invoice due dates', 'Changes to invoice.js'],
+        options: ['fixed stuff', 'WIP', 'Fix timezone bug in invoice due dates', 'Changes to InvoiceService.cs'],
         answer: 2,
         why: 'It says what changed and where, in the imperative mood.',
       },

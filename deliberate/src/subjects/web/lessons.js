@@ -17,7 +17,6 @@ const SRC = {
   execModel: { title: 'MDN: JavaScript execution model', url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Execution_model' },
   webApis: { title: 'MDN: Web APIs', url: 'https://developer.mozilla.org/en-US/docs/Web/API' },
   node: { title: 'Node.js: Introduction to Node.js', url: 'https://nodejs.org/en/learn/getting-started/introduction-to-nodejs' },
-  nodeHttp: { title: 'Node.js docs: HTTP module', url: 'https://nodejs.org/api/http.html' },
   promises: { title: 'MDN: Using promises', url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises' },
   fetch: { title: 'MDN: Using the Fetch API', url: 'https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch' },
   forms: { title: 'MDN: Sending form data', url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Sending_and_retrieving_form_data' },
@@ -26,12 +25,10 @@ const SRC = {
   websockets: { title: 'MDN: The WebSocket API', url: 'https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API' },
   sameOrigin: { title: 'MDN: Same-origin policy', url: 'https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy' },
   cors: { title: 'MDN: Cross-Origin Resource Sharing (CORS)', url: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS' },
-  expressRouting: { title: 'Express: Routing', url: 'https://expressjs.com/en/guide/routing.html' },
   nginx: { title: 'Nginx: ngx_http_proxy_module', url: 'https://nginx.org/en/docs/http/ngx_http_proxy_module.html' },
   proxy: { title: 'MDN: Proxy server', url: 'https://developer.mozilla.org/en-US/docs/Glossary/Proxy_server' },
   cookies: { title: 'MDN: Using HTTP cookies', url: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies' },
   localStorage: { title: 'MDN: Web Storage API', url: 'https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API' },
-  postgres: { title: 'PostgreSQL docs: Concepts', url: 'https://www.postgresql.org/docs/current/tutorial-concepts.html' },
   frameworksIntro: { title: 'MDN: Introduction to client-side frameworks', url: 'https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Frameworks_libraries/Introduction' },
   thinkingReact: { title: 'React docs: Thinking in React', url: 'https://react.dev/learn/thinking-in-react' },
   rendering: { title: 'web.dev: Rendering on the web (updated January 2026)', url: 'https://web.dev/articles/rendering-on-the-web' },
@@ -58,6 +55,26 @@ const SRC = {
   pkce: { title: 'RFC 7636: Proof Key for Code Exchange (PKCE)', url: 'https://datatracker.ietf.org/doc/html/rfc7636' },
   oidc: { title: 'OpenID Connect Core 1.0', url: 'https://openid.net/specs/openid-connect-core-1_0.html' },
   oauthBrowser: { title: 'IETF draft: OAuth 2.0 for browser-based applications', url: 'https://datatracker.ietf.org/doc/draft-ietf-oauth-browser-based-apps/' },
+  minimalApis: { title: 'Microsoft Learn: Minimal APIs overview', url: 'https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis' },
+  kestrel: { title: 'Microsoft Learn: Kestrel web server in ASP.NET Core', url: 'https://learn.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel' },
+  asyncScenarios: { title: 'Microsoft Learn: Asynchronous programming scenarios in C#', url: 'https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-scenarios' },
+  aspnetRouting: { title: 'Microsoft Learn: Routing in ASP.NET Core', url: 'https://learn.microsoft.com/en-us/aspnet/core/fundamentals/routing' },
+  aspnetMiddleware: { title: 'Microsoft Learn: ASP.NET Core middleware', url: 'https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/' },
+  forwardedHeaders: { title: 'Microsoft Learn: Configure ASP.NET Core to work with proxy servers and load balancers', url: 'https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer' },
+  aspnetCookie: { title: 'Microsoft Learn: Cookie authentication without ASP.NET Core Identity', url: 'https://learn.microsoft.com/en-us/aspnet/core/security/authentication/cookie' },
+  sqlServer: { title: 'Microsoft Learn: SQL Server technical documentation', url: 'https://learn.microsoft.com/en-us/sql/sql-server/' },
+  efOverview: { title: 'Microsoft Learn: Entity Framework Core overview', url: 'https://learn.microsoft.com/en-us/ef/core/' },
+  efRawSql: { title: 'Microsoft Learn: EF Core SQL queries (FromSql and SQL injection)', url: 'https://learn.microsoft.com/en-us/ef/core/querying/sql-queries' },
+  signalr: { title: 'Microsoft Learn: Overview of ASP.NET Core SignalR', url: 'https://learn.microsoft.com/en-us/aspnet/core/signalr/introduction' },
+  blazor: { title: 'Microsoft Learn: ASP.NET Core Blazor', url: 'https://learn.microsoft.com/en-us/aspnet/core/blazor/' },
+  aspnetCors: { title: 'Microsoft Learn: Enable CORS in ASP.NET Core', url: 'https://learn.microsoft.com/en-us/aspnet/core/security/cors' },
+  aspnetPasswords: { title: 'Microsoft Learn: Hash passwords in ASP.NET Core', url: 'https://learn.microsoft.com/en-us/aspnet/core/security/data-protection/consumer-apis/password-hashing' },
+  aspnetJwt: { title: 'Microsoft Learn: Configure JWT bearer authentication in ASP.NET Core', url: 'https://learn.microsoft.com/en-us/aspnet/core/security/authentication/configure-jwt-bearer-authentication' },
+  aspnetOidc: { title: 'Microsoft Learn: Configure OpenID Connect web authentication in ASP.NET Core', url: 'https://learn.microsoft.com/en-us/aspnet/core/security/authentication/configure-oidc-web-authentication' },
+  aspnetPolicies: { title: 'Microsoft Learn: Policy-based authorization in ASP.NET Core', url: 'https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies' },
+  aspnetResourceAuthz: { title: 'Microsoft Learn: Resource-based authorization in ASP.NET Core', url: 'https://learn.microsoft.com/en-us/aspnet/core/security/authorization/resourcebased' },
+  dotnetDeploy: { title: 'Microsoft Learn: .NET application publishing overview', url: 'https://learn.microsoft.com/en-us/dotnet/core/deploying/' },
+  dotnetIntro: { title: 'Microsoft Learn: Introduction to .NET', url: 'https://learn.microsoft.com/en-us/dotnet/core/introduction' },
   letsEncrypt: { title: 'Let\'s Encrypt: How it works', url: 'https://letsencrypt.org/how-it-works/' },
 }
 
@@ -85,6 +102,8 @@ Developers split a web app into parts by **where the code runs**:
 - **Frontend** (client side): code that runs **in the user's browser**. HTML for structure, CSS for appearance, JavaScript for behaviour. It draws the interface and reacts to clicks.
 - **Backend** (server side): code that runs **on the server**. It receives requests, applies the rules of the business (who's allowed to do what, how prices are calculated), and talks to the database. Users never see this code.
 - **Database**: where data lives long-term, such as users, orders and posts. Usually only the backend talks to it.
+
+In this course, backend examples use **C#** with **ASP.NET Core** and a **SQL Server** database, a common combination at work. Frontend examples use **JavaScript**, because that's the language browsers run.
 
 This app, Deliberate, is unusual: it's **frontend only**. GitHub Pages hands your browser some files, and everything else runs on your device, with progress saved in your browser. There's no backend and no database. That's why your progress doesn't sync between your phone and laptop.
 
@@ -370,16 +389,16 @@ A dynamic request goes like this, following MDN's example of a sports site's "be
 
 ## Templates and data
 
-A **template** is HTML with placeholders:
+A **template** is HTML with placeholders. In ASP.NET Core, templates are **Razor** files, where \`@\` switches to C#:
 
-\`\`\`html
-<h1>Hello, {{ user.name }}</h1>
+\`\`\`cshtml
+<h1>Hello, @Model.User.Name</h1>
 <ul>
-  {% for order in orders %}<li>{{ order.total }}</li>{% endfor %}
+  @foreach (var order in Model.Orders) { <li>@order.Total</li> }
 </ul>
 \`\`\`
 
-The application fills the gaps for each request. Change the template once and every page built from it changes. This style, where the server builds full HTML pages, is how most of the web worked for decades, and it's still common: frameworks like Django, Rails, Laravel and Express with templates.
+The application fills the gaps for each request. Change the template once and every page built from it changes. This style, where the server builds full HTML pages, is how most of the web worked for decades, and it's still common: ASP.NET Core Razor Pages and MVC views, and elsewhere Django, Rails and Laravel.
 
 ## Static files still go the fast way
 
@@ -665,6 +684,8 @@ The browser also enforces **security rules** on all of these: a page can't read 
 **Node.js** runs the same V8 engine **outside the browser**. It has no \`document\` or \`window\`, because there's no page. Instead, it offers servers, files and processes: \`node:http\`, \`node:fs\`.
 
 So "JavaScript" in a browser and in Node is the same language with different powers. Code that only uses the language, like a function that sorts lessons, runs in both. Code that touches \`document\` only runs in a browser; code that reads files only runs in Node.
+
+The same split exists for C#: the language is small, the **.NET runtime** runs it, and .NET's libraries supply files, networking and ASP.NET Core's web server. Browsers can't run C# directly; they run JavaScript, plus WebAssembly, which is how Blazor WebAssembly runs .NET code in a page.
 `,
     takeaways: [
       'An engine (like V8) runs the language; a host (browser or Node) provides access to the outside world.',
@@ -698,7 +719,7 @@ So "JavaScript" in a browser and in Node is the same language with different pow
       { id: 'c-web-runtime-3', front: 'How does Node.js relate to the browser?', back: 'Same V8 engine, different host: no DOM, but files, processes and HTTP servers.' },
     ],
     related: ['web-event-loop', 'web-listen'],
-    sources: [SRC.execModel, SRC.webApis, SRC.node],
+    sources: [SRC.execModel, SRC.webApis, SRC.node, SRC.dotnetIntro],
   },
   {
     id: 'web-event-loop',
@@ -1061,7 +1082,7 @@ socket.send(JSON.stringify({ text: 'Hello!' }))
 
 Best for genuinely interactive, two-way, low-latency apps: chat, multiplayer games, collaborative editing. The costs: the server must hold many open connections, and reconnection and missed messages are your job to handle.
 
-**Rule of thumb:** poll if updates are rare, use SSE for server-to-client streams, and use WebSockets when both sides talk constantly.
+**Rule of thumb:** poll if updates are rare, use SSE for server-to-client streams, and use WebSockets when both sides talk constantly. In ASP.NET Core, **SignalR** handles the details: it uses WebSockets when it can and falls back to other transports.
 `,
     takeaways: [
       'Polling asks repeatedly: simple but wasteful and delayed.',
@@ -1093,7 +1114,7 @@ Best for genuinely interactive, two-way, low-latency apps: chat, multiplayer gam
       { id: 'c-web-realtime-2', front: 'What does SSE give you for free?', back: 'Automatic reconnection, over ordinary HTTP, with the EventSource API.' },
     ],
     related: ['web-fetch', 'web-listen'],
-    sources: [SRC.sse, SRC.websockets],
+    sources: [SRC.sse, SRC.websockets, SRC.signalr],
   },
   {
     id: 'web-cors',
@@ -1130,6 +1151,8 @@ Two important consequences:
 
 - **CORS is enforced by the browser.** \`curl\` or a backend calling the same API isn't affected. It protects users, not servers.
 - **You fix CORS errors on the server**, by sending the right headers, not in frontend code. And keep the allowed list specific: allowing every origin with credentials is not permitted, for good reason.
+
+In ASP.NET Core, the CORS middleware sends the headers: \`builder.Services.AddCors(o => o.AddPolicy("web", p => p.WithOrigins("https://app.example.com")))\`, then \`app.UseCors("web")\`.
 `,
     takeaways: [
       'An origin is scheme + host + port; a different port is a different origin.',
@@ -1162,7 +1185,7 @@ Two important consequences:
       { id: 'c-web-cors-3', front: 'What is a CORS preflight?', back: 'An OPTIONS request the browser sends first to check the server accepts a non-simple cross-origin request.' },
     ],
     related: ['web-session', 'web-security'],
-    sources: [SRC.sameOrigin, SRC.cors],
+    sources: [SRC.sameOrigin, SRC.cors, SRC.aspnetCors],
   },
   {
     id: 'web-listen',
@@ -1175,72 +1198,69 @@ Two important consequences:
 
 A backend isn't a file that gets opened; it's a **program that keeps running**, waiting. When it starts, it asks the operating system to **listen** on a port. From then on, connections that arrive at that machine on that port are handed to it.
 
-Here's a complete web server in Node.js, adapted from the Node documentation:
+Here's a complete ASP.NET Core web server, the whole of \`Program.cs\`:
 
-\`\`\`js
-import { createServer } from 'node:http'
+\`\`\`csharp
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
 
-const server = createServer((req, res) => {
-  // runs once for every request
-  res.statusCode = 200
-  res.setHeader('Content-Type', 'text/plain')
-  res.end(\`You asked for \${req.method} \${req.url}\`)
-})
+// runs once for every request, whatever the path
+app.MapGet("/{**path}", (HttpRequest request) =>
+    $"You asked for {request.Method} {request.Path}");
 
-server.listen(3000, '127.0.0.1', () => {
-  console.log('Listening on http://127.0.0.1:3000')
-})
+app.Run("http://127.0.0.1:5000");
 \`\`\`
 
-Run it with \`node server.mjs\` and the program doesn't exit: it sits listening. Visit \`http://127.0.0.1:3000/hello\` and the function runs with \`req.method\` set to \`GET\` and \`req.url\` set to \`/hello\`. The \`req\` object holds the request (method, URL, headers, body); you fill in \`res\` and call \`res.end()\` to send the response.
+Start it with \`dotnet run\` and the program doesn't exit: it sits listening. Visit \`http://127.0.0.1:5000/hello\` and the handler runs with \`request.Method\` set to \`GET\` and \`request.Path\` set to \`/hello\`. \`HttpRequest\` holds the request (method, path, headers, body); the string you return becomes the response body, sent with status 200.
 
-Every backend framework, whether Express, Django, Rails, Spring or Go's \`net/http\`, does this underneath: listen on a port, receive a request, call your code, send a response.
+Underneath, ASP.NET Core's built-in web server, **Kestrel**, listens on the port, parses HTTP and hands each request to your code. Every backend framework, whether ASP.NET Core, Express, Django, Spring or Go's \`net/http\`, does this: listen on a port, receive a request, call your code, send a response.
 
 ## Handle each request without blocking
 
-A busy server handles thousands of requests at once. Node runs your code on **one thread**, using the same event-loop idea as the browser: while one request waits for the database, others are handled. Node's docs describe blocking as "the exception rather than the norm", which lets one process serve thousands of concurrent connections.
+A busy server handles thousands of requests at once. .NET runs them on a **thread pool**. When your code \`await\`s something slow, like a database query, its thread goes back to the pool to serve other requests until the result arrives. That's why ASP.NET Core code is **async all the way down**: \`await db.SaveChangesAsync()\`, not \`db.SaveChanges()\`.
 
-Other platforms use **multiple threads or processes**, often many copies of the app. Either way, the rule is the same: don't make every request wait behind one slow operation.
+The opposite hurts: blocking calls such as \`.Result\`, \`.Wait()\` or \`Thread.Sleep\` hold a thread doing nothing. Under load the pool runs dry, a problem called **thread pool starvation**, and every request slows down. Node.js reaches the same goal differently, with one thread and an event loop. Either way: don't make requests wait behind one slow operation.
 
 ## Development vs production addresses
 
 - \`127.0.0.1\` or \`localhost\` means **this machine only**: only programs on your computer can connect. Good for development.
-- \`0.0.0.0\` means **all network interfaces**: other machines can connect. Servers in production or containers listen this way.
-- Development servers use high ports like 3000, 5173 or 8000. In production, the public sees **443**, usually at a **reverse proxy** in front, as the next lessons explain.
+- \`0.0.0.0\` means **all network interfaces**: other machines can connect. Servers in production or containers listen this way (ASP.NET Core's container images listen on port 8080).
+- Development servers use high ports like 5000, 5173 or 8080. In production, the public sees **443**, usually at a **reverse proxy** in front, as the next lessons explain.
 `,
     takeaways: [
-      'A backend is a long-running program that listens on a port and runs a handler for each request.',
-      'The handler reads the request (method, URL, headers, body) and writes the response (status, headers, body).',
+      'A backend is a long-running program that listens on a port and runs a handler for each request; in .NET, Kestrel does the listening.',
+      'Await slow work so the thread pool can serve other requests; blocking calls cause thread pool starvation.',
       '127.0.0.1 accepts only local connections; 0.0.0.0 accepts connections from the network.',
     ],
     quiz: [
       {
-        q: 'What does `server.listen(3000)` do?',
-        options: ['Sends a request to port 3000', 'Asks the operating system to hand this program connections that arrive on port 3000', 'Opens a browser', 'Starts a database'],
+        q: 'What does `app.Run("http://127.0.0.1:5000")` do?',
+        options: ['Sends a request to port 5000', 'Starts Kestrel listening for connections on port 5000, then waits for requests', 'Opens a browser', 'Starts a database'],
         answer: 1,
-        why: 'The program then waits for requests.',
+        why: 'The program then keeps running, handling requests.',
       },
       {
-        q: 'A server listens on `127.0.0.1:8000`. A colleague on the same Wi-Fi tries to open it from their laptop. What happens?',
+        q: 'A server listens on `127.0.0.1:5000`. A colleague on the same Wi-Fi tries to open it from their laptop. What happens?',
         options: ['It works', 'It fails: 127.0.0.1 accepts connections only from the same machine', 'It redirects', 'It asks for a password'],
         answer: 1,
         why: 'Listen on 0.0.0.0 (carefully) to accept network connections.',
       },
       {
-        q: 'How does a single Node.js process serve many requests at once?',
-        options: ['It can\'t', 'Its event loop handles other requests while one waits for I/O like a database', 'It runs one request per day', 'The browser does the work'],
+        q: 'Endpoints call `httpClient.GetStringAsync(url).Result`. Under heavy load everything slows to a crawl. Why?',
+        options: ['.Result is slower to type', 'Each blocked call holds a thread-pool thread, so the pool runs out (thread pool starvation)', 'HttpClient is limited to one request', 'Kestrel only allows 10 requests'],
         answer: 1,
-        why: 'Non-blocking I/O lets one process juggle many connections.',
+        why: 'Use await so threads return to the pool while waiting.',
       },
     ],
-    practice: 'If you have Node installed, save the example as `server.mjs`, run it, and visit a few paths in your browser. Watch the output change with `req.url`.',
+    practice: 'If you have the .NET SDK, run `dotnet new web -o hello`, replace Program.cs with the example, run `dotnet run`, and visit a few paths. Watch the output change with the path.',
     cards: [
       { id: 'c-web-listen-1', front: 'What does it mean for a server to listen on a port?', back: 'It\'s a running program the OS hands connections to when they arrive on that port.' },
-      { id: 'c-web-listen-2', front: 'What are req and res in a request handler?', back: 'req: the incoming request (method, URL, headers, body). res: the response you build and send.' },
-      { id: 'c-web-listen-3', front: '127.0.0.1 vs 0.0.0.0?', back: '127.0.0.1: local connections only. 0.0.0.0: all network interfaces.' },
+      { id: 'c-web-listen-2', front: 'What is Kestrel?', back: 'ASP.NET Core\'s built-in web server: it listens on a port, parses HTTP and passes each request to your code.' },
+      { id: 'c-web-listen-3', front: 'Why is ASP.NET Core code async?', back: 'Awaiting slow I/O returns the thread to the pool to serve other requests; blocking (.Result, .Wait()) causes thread pool starvation.' },
+      { id: 'c-web-listen-4', front: '127.0.0.1 vs 0.0.0.0?', back: '127.0.0.1: local connections only. 0.0.0.0: all network interfaces.' },
     ],
     related: ['web-runtime', 'web-routing', 'web-reaching-server'],
-    sources: [SRC.node, SRC.nodeHttp, SRC.port],
+    sources: [SRC.minimalApis, SRC.kestrel, SRC.asyncScenarios, SRC.port],
   },
   {
     id: 'web-routing',
@@ -1251,68 +1271,74 @@ Other platforms use **multiple threads or processes**, often many copies of the 
     body: `
 ## Routes map requests to handlers
 
-A real backend has many endpoints. Instead of one giant \`if\` statement, frameworks use **routing**. Express's documentation defines it as how an application's endpoints respond to client requests:
+A real backend has many endpoints. Instead of one giant \`if\` statement, frameworks use **routing**: matching each request to the code that should handle it. In ASP.NET Core minimal APIs:
 
-\`\`\`js
-app.get('/lessons', listLessons)
-app.get('/lessons/:lessonId', getLesson)
-app.post('/lessons/:lessonId/complete', completeLesson)
+\`\`\`csharp
+app.MapGet("/lessons", ListLessons);
+app.MapGet("/lessons/{lessonId}", GetLesson);
+app.MapPost("/lessons/{lessonId}/complete", CompleteLesson);
 \`\`\`
 
-The framework matches the **method and path** of each request to a route. \`:lessonId\` is a **route parameter**: for \`/lessons/42\`, the handler finds \`req.params.lessonId\` equal to \`"42"\`. If nothing matches, the framework returns **404**.
+The framework matches the **method and path** of each request to a route. \`{lessonId}\` is a **route parameter**: for \`/lessons/42\`, the handler's \`lessonId\` parameter receives \`"42"\`. A constraint such as \`{id:int}\` converts it to a number, and \`/lessons/abc\` simply doesn't match. If nothing matches, the response is **404**. Controllers with \`[HttpGet("lessons/{lessonId}")]\` attributes do the same job.
 
 ## Middleware: steps every request passes through
 
-Many things need to happen for lots of routes: logging, reading the JSON body, checking the user is logged in, adding security headers. **Middleware** are functions that run **before** (and sometimes after) the handler, in order, each deciding to pass the request on or stop it:
+Many things need to happen for lots of routes: logging, handling errors, working out who the user is, checking permissions. **Middleware** are steps that run **before** (and after) the endpoint, in order, each deciding to pass the request on or stop it:
 
-\`\`\`js
-app.use(logRequests)          // every request
-app.use(express.json())       // parse JSON bodies
-app.use('/api', requireLogin) // only /api routes
+\`\`\`csharp
+app.UseExceptionHandler("/error"); // turns crashes into a clean 500
+app.UseAuthentication();           // reads the cookie or token: who is this?
+app.UseAuthorization();            // checks [Authorize] and policies: may they?
 
-function requireLogin(req, res, next) {
-  if (!req.session.userId) return res.status(401).json({ error: 'Log in first' })
-  next() // continue to the next middleware or the route
-}
+app.Use(async (context, next) =>   // your own middleware
+{
+    app.Logger.LogInformation("{Method} {Path}", context.Request.Method, context.Request.Path);
+    await next(context);           // continue down the pipeline
+});
 \`\`\`
 
-Think of it as a pipeline: request → logging → body parser → auth check → route handler → response.
+Think of it as a pipeline: request → error handling → authentication → authorization → endpoint → response. Order matters: authorization can't run before authentication.
 
 ## Inside a handler
 
 A typical handler does the same few things:
 
-1. **Read and validate input**: parameters, query string, body. Reject bad input with a 400.
+1. **Read and validate input**: route values, query string, body. Reject bad input with a 400.
 2. **Check permissions**: is this user allowed to do this to this item? (403 if not.)
 3. **Do the work**: query or update the database, call other services.
 4. **Send a response**: a status code and usually JSON.
 
-\`\`\`js
-async function completeLesson(req, res) {
-  const score = Number(req.body.score)
-  if (!Number.isInteger(score) || score < 0) return res.status(400).json({ error: 'Invalid score' })
-  await db.saveCompletion(req.session.userId, req.params.lessonId, score)
-  res.status(204).end()
-}
+\`\`\`csharp
+app.MapPost("/lessons/{lessonId}/complete",
+    async (string lessonId, CompletionRequest body, ClaimsPrincipal user, AppDbContext db) =>
+    {
+        if (body.Score < 0) return Results.BadRequest(new { error = "Invalid score" });
+        var userId = user.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        db.Completions.Add(new Completion(userId, lessonId, body.Score));
+        await db.SaveChangesAsync();
+        return Results.NoContent();   // 204
+    }).RequireAuthorization();
 \`\`\`
+
+Notice how much the framework does: the route value, the JSON body (as a \`CompletionRequest\` record), the logged-in user and the \`AppDbContext\` from dependency injection all arrive as typed parameters.
 `,
     takeaways: [
       'Routing matches a request\'s method and path to a handler; route parameters capture parts of the path.',
-      'Middleware runs shared steps (logging, parsing, auth) in order before the handler.',
+      'Middleware runs shared steps (errors, authentication, authorization, logging) in order around the endpoint.',
       'Handlers validate input, check permissions, do the work and send a status plus data.',
     ],
     quiz: [
       {
-        q: 'With the route `app.get("/users/:userId", …)`, what is `req.params.userId` for `/users/17`?',
-        options: ['17 as a number', 'The string "17"', 'Undefined', '"/users/17"'],
+        q: 'With `app.MapGet("/users/{userId}", (string userId) => ...)`, what does `userId` hold for `/users/17`?',
+        options: ['17 as an int', 'The string "17"', 'null', '"/users/17"'],
         answer: 1,
-        why: 'Route parameters arrive as strings.',
+        why: 'Route values bind as strings unless you use a constraint like {userId:int} and an int parameter.',
       },
       {
         q: 'What is middleware?',
-        options: ['The database', 'Functions that run in order on requests before the handler, such as logging or auth checks', 'The CSS framework', 'A type of cache'],
+        options: ['The database', 'Steps that run in order around every request, such as error handling or authentication', 'The CSS framework', 'A type of cache'],
         answer: 1,
-        why: 'Each can pass the request on with next() or stop it.',
+        why: 'Each can pass the request on by calling next, or stop it.',
       },
       {
         q: 'A request has a valid login but asks to delete someone else\'s post. What should the handler return?',
@@ -1322,12 +1348,12 @@ async function completeLesson(req, res) {
       },
     ],
     cards: [
-      { id: 'c-web-routing-1', front: 'What is routing in a backend?', back: 'Matching each request\'s method and path to the handler function that should respond.' },
-      { id: 'c-web-routing-2', front: 'What does middleware do?', back: 'Runs shared steps (logging, parsing, auth) in a pipeline before the handler; calls next() to continue.' },
-      { id: 'c-web-routing-3', front: 'Four steps inside a handler?', back: 'Validate input, check permissions, do the work, send a response.' },
+      { id: 'c-web-routing-1', front: 'What does routing do?', back: 'Matches each request\'s method and path to a handler, e.g. app.MapGet("/lessons/{lessonId}", ...).' },
+      { id: 'c-web-routing-2', front: 'What is middleware in ASP.NET Core?', back: 'Steps in the request pipeline (UseExceptionHandler, UseAuthentication, UseAuthorization...) that run in order and can pass the request on or stop it.' },
+      { id: 'c-web-routing-3', front: 'Four steps inside a typical handler?', back: 'Validate input (400), check permission (403), do the work, send a status and data.' },
     ],
-    related: ['web-listen', 'web-apis', 'web-security'],
-    sources: [SRC.expressRouting],
+    related: ['web-listen', 'web-apis', 'eng-patterns-behaviour'],
+    sources: [SRC.aspnetRouting, SRC.aspnetMiddleware, SRC.minimalApis],
   },
   {
     id: 'web-proxy',
@@ -1338,7 +1364,7 @@ async function completeLesson(req, res) {
     body: `
 ## What a reverse proxy does
 
-A **reverse proxy** is a server that receives requests from the internet and **forwards** them to your application, then passes the response back. Common ones are **Nginx**, Caddy, HAProxy, and cloud load balancers.
+A **reverse proxy** is a server that receives requests from the internet and **forwards** them to your application, then passes the response back. Common ones are **Nginx**, Caddy, HAProxy, IIS, Microsoft's **YARP**, and cloud load balancers such as Azure Application Gateway.
 
 The basic Nginx configuration from its documentation:
 
@@ -1373,7 +1399,7 @@ Behind a proxy, your app sees every request coming **from the proxy**, not from 
 - \`X-Forwarded-Proto\`: whether the user used HTTPS.
 - \`Host\`: which domain they asked for.
 
-Only trust these headers when they come from **your own proxy**: anyone can send fake ones directly.
+Only trust these headers when they come from **your own proxy**: anyone can send fake ones directly. In ASP.NET Core, the \`UseForwardedHeaders()\` middleware applies them, and only trusts the proxies you configure.
 `,
     takeaways: [
       'A reverse proxy forwards internet requests to your app and handles HTTPS, static files, limits and compression.',
@@ -1406,7 +1432,7 @@ Only trust these headers when they come from **your own proxy**: anyone can send
       { id: 'c-web-proxy-3', front: 'What is X-Forwarded-For?', back: 'A header a proxy adds with the original client IP; trust it only from your own proxy.' },
     ],
     related: ['eng-scaling-app', 'fg-health-checks', 'web-listen'],
-    sources: [SRC.nginx, SRC.proxy],
+    sources: [SRC.nginx, SRC.proxy, SRC.forwardedHeaders],
   },
   {
     id: 'web-session',
@@ -1438,7 +1464,7 @@ There are two common ways to remember who's logged in:
 - **Server-side sessions**: after login, the server creates a random **session ID**, stores "session a3fWa9 = user 17" in a database or cache, and puts only the ID in a cookie. Each request, it looks the ID up. Logging out deletes it on the server. MDN recommends exactly this kind of opaque identifier rather than storing sensitive data in cookies, which users can read and change.
 - **Tokens**: the server gives the client a **signed** token, often a **JWT**, containing the user ID and an expiry. The server checks the signature on each request without a lookup. Common for mobile apps and APIs. The catch: a token is valid until it expires, so revoking one early needs extra machinery.
 
-For browser apps, a session ID in an \`HttpOnly\` cookie is a safe, simple default.
+For browser apps, a session ID in an \`HttpOnly\` cookie is a safe, simple default. ASP.NET Core's **cookie authentication** is a close cousin: by default it puts the user's claims in the cookie itself, encrypted and signed with the Data Protection system so the user can't read or change them.
 
 ## Storing data in the browser
 
@@ -1481,7 +1507,7 @@ Don't use cookies for general storage: they're small (around 4 KB) and sent with
       { id: 'c-web-session-3', front: 'Three browser storage options?', back: 'localStorage (persists), sessionStorage (per tab), IndexedDB (large, structured).' },
     ],
     related: ['web-http', 'web-cors', 'web-security'],
-    sources: [SRC.cookies, SRC.localStorage],
+    sources: [SRC.cookies, SRC.localStorage, SRC.aspnetCookie],
   },
   {
     id: 'web-databases',
@@ -1505,17 +1531,26 @@ Your backend connects to the database over the network, much as a browser connec
 
 ## Relational databases and SQL
 
-**Relational databases**, such as PostgreSQL, MySQL and SQLite, store data in **tables** with fixed columns, like spreadsheets with rules. Rows in one table refer to rows in another by ID:
+**Relational databases**, such as SQL Server, PostgreSQL, MySQL and SQLite, store data in **tables** with fixed columns, like spreadsheets with rules. Rows in one table refer to rows in another by ID:
 
 \`\`\`sql
--- users(id, name)            completions(user_id, lesson_id, score)
-SELECT users.name, completions.score
-FROM completions
-JOIN users ON users.id = completions.user_id
-WHERE completions.lesson_id = 'web-http';
+-- Users(Id, Name)            Completions(UserId, LessonId, Score)
+SELECT u.Name, c.Score
+FROM Completions AS c
+JOIN Users AS u ON u.Id = c.UserId
+WHERE c.LessonId = 'web-http';
 \`\`\`
 
-**SQL** is the language for asking questions and making changes. Relational databases enforce structure (every completion must point to a real user), which catches many bugs. They're the default choice for most applications.
+**SQL** is the language for asking questions and making changes; SQL Server's dialect is called T-SQL. Relational databases enforce structure (every completion must point to a real user), which catches many bugs. They're the default choice for most applications.
+
+In .NET you usually reach the database through **EF Core**, an object-relational mapper that turns C# LINQ into SQL. This produces the query above:
+
+\`\`\`csharp
+var scores = await db.Completions
+    .Where(c => c.LessonId == "web-http")
+    .Select(c => new { c.User.Name, c.Score })
+    .ToListAsync();
+\`\`\`
 
 ## Document databases
 
@@ -1549,17 +1584,18 @@ There are also **key–value stores** like Redis, used as fast caches and for se
       },
       {
         q: 'Which is a relational database?',
-        options: ['Redis', 'PostgreSQL', 'MongoDB', 'localStorage'],
+        options: ['Redis', 'SQL Server', 'MongoDB', 'localStorage'],
         answer: 1,
-        why: 'PostgreSQL stores tables queried with SQL.',
+        why: 'SQL Server stores tables queried with SQL (its dialect is T-SQL).',
       },
     ],
     cards: [
       { id: 'c-web-databases-1', front: 'What does a database give you over files?', back: 'Safe concurrent writes, fast indexed queries, crash safety and transactions.' },
       { id: 'c-web-databases-2', front: 'Relational vs document databases?', back: 'Relational: tables with relationships, SQL, enforced structure. Document: flexible JSON-like documents.' },
+      { id: 'c-web-databases-3', front: 'What is EF Core?', back: '.NET\'s object-relational mapper: you write LINQ against C# classes and it generates and runs the SQL.' },
     ],
     related: ['eng-scaling-data', 'web-serve-dynamic'],
-    sources: [SRC.postgres],
+    sources: [SRC.sqlServer, SRC.efOverview],
   },
   {
     id: 'web-auth-basics',
@@ -1658,11 +1694,15 @@ Attackers who steal hashes **guess**: they hash billions of common passwords and
 - A **salt**: a random value stored with each hash and mixed in. Two people with the password \`sunshine1\` get different hashes, so one guess can't crack everyone at once.
 - A deliberately **slow** algorithm. Fast hashes like SHA-256 are built for speed, which helps attackers. Password hashing algorithms are tuned to be slow and memory-hungry.
 
-OWASP's current advice: use **Argon2id** (at least 19 MiB of memory, 2 iterations, 1 degree of parallelism). For older systems, **bcrypt** with a work factor of 10 or more (it only uses the first 72 bytes), or **PBKDF2** with 600,000 iterations where FIPS compliance is required. Libraries handle the salt for you:
+OWASP's current advice: use **Argon2id** (at least 19 MiB of memory, 2 iterations, 1 degree of parallelism). For older systems, **bcrypt** with a work factor of 10 or more (it only uses the first 72 bytes), or **PBKDF2** with 600,000 iterations where FIPS compliance is required.
 
-\`\`\`js
-const hash = await argon2.hash(password)        // store this
-const ok = await argon2.verify(hash, attempt)   // at login
+In .NET, **ASP.NET Core Identity** handles this, along with lockout after repeated failures. Its \`PasswordHasher\` uses salted PBKDF2, and Microsoft's docs point new apps to it rather than calling PBKDF2 yourself:
+
+\`\`\`csharp
+var hasher = new PasswordHasher<User>();
+string hash = hasher.HashPassword(user, password);               // store this
+var result = hasher.VerifyHashedPassword(user, hash, attempt);   // at login
+// Success, Failed, or SuccessRehashNeeded: save a new hash with today's settings
 \`\`\`
 
 ## Modern password rules
@@ -1715,7 +1755,7 @@ Add **rate limiting** on login attempts and offer **multi-factor authentication*
       { id: 'c-web-passwords-4', front: 'NIST password length rules (2025)?', back: 'At least 15 characters as a single factor, 8 with MFA; allow at least 64. No composition rules or forced rotation.' },
     ],
     related: ['web-auth-basics', 'web-security'],
-    sources: [SRC.pwCheat, SRC.nist, SRC.passkeys],
+    sources: [SRC.pwCheat, SRC.nist, SRC.passkeys, SRC.aspnetPasswords],
   },
   {
     id: 'web-jwt',
@@ -1757,10 +1797,18 @@ Most JWT bugs come from checking too little. On every request, with a maintained
 
 - **Pin the algorithm** you expect. Never let the token's own \`alg\` header decide. Attackers have sent \`"alg": "none"\`, or tricked servers into checking an RS256 token as HS256 using the public key as the secret.
 - Check \`exp\`, and \`iss\` and \`aud\`, so a token for another app is rejected.
-- Use a long random secret, kept server-side.
+- Use a long random secret, kept server-side, or better, asymmetric keys.
 
-\`\`\`js
-jwt.verify(token, key, { algorithms: ['RS256'], issuer: 'https://api.example', audience: 'web' })
+In ASP.NET Core, the JWT bearer handler does all of this for each request; you supply the expected values:
+
+\`\`\`csharp
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(o =>
+    {
+        o.Authority = "https://login.example.com";  // issuer; its public keys are fetched from here
+        o.Audience = "web-api";
+        o.TokenValidationParameters.ValidAlgorithms = ["RS256"];
+    });
 \`\`\`
 `,
     takeaways: [
@@ -1804,7 +1852,7 @@ jwt.verify(token, key, { algorithms: ['RS256'], issuer: 'https://api.example', a
       'Paste a token from your browser\'s dev tools into a JWT decoder (only a test account\'s!) and you\'ll see its claims in plain text.',
     ],
     related: ['web-session', 'web-tokens'],
-    sources: [SRC.jwtRfc, SRC.jwtBcp, SRC.jwtIntro, SRC.jwe],
+    sources: [SRC.jwtRfc, SRC.jwtBcp, SRC.jwtIntro, SRC.jwe, SRC.aspnetJwt],
   },
   {
     id: 'web-tokens',
@@ -1840,7 +1888,7 @@ Notice how far that drifts from "no lookups". If you need instant logout everywh
 | Memory (a JS variable) | Also readable by XSS, but gone on reload; pair with a refresh cookie. |
 | HttpOnly cookie | JavaScript can't read it at all. Sent automatically, so guard against CSRF. |
 
-The common recommendation for browser apps is an \`HttpOnly; Secure; SameSite=Lax\` (or \`Strict\`) cookie. \`SameSite\` stops most cross-site request forgery; add CSRF tokens for older browsers or risky actions. Current IETF guidance for browser apps goes further: a **backend for frontend** (BFF) holds the tokens on the server, and the browser gets only a session cookie.
+The common recommendation for browser apps is an \`HttpOnly; Secure; SameSite=Lax\` (or \`Strict\`) cookie. \`SameSite\` stops most cross-site request forgery; add CSRF tokens for older browsers or risky actions. Current IETF guidance for browser apps goes further: a **backend for frontend** (BFF) holds the tokens on the server, and the browser gets only a session cookie. ASP.NET Core's documentation recommends the same for web apps.
 `,
     takeaways: [
       'Use short-lived access tokens and revocable refresh tokens, rotated on each use.',
@@ -1879,7 +1927,7 @@ The common recommendation for browser apps is an \`HttpOnly; Secure; SameSite=La
       { id: 'c-web-tokens-3', front: 'Best place for auth tokens in a browser app?', back: 'An HttpOnly, Secure, SameSite cookie, or a backend-for-frontend holding tokens server-side. Not localStorage.' },
     ],
     related: ['web-jwt', 'web-session', 'web-security'],
-    sources: [SRC.sessCheat, SRC.h5Cheat, SRC.csrfCheat, SRC.oauthBrowser, SRC.setCookie],
+    sources: [SRC.sessCheat, SRC.h5Cheat, SRC.csrfCheat, SRC.oauthBrowser, SRC.aspnetJwt],
   },
   {
     id: 'web-oauth',
@@ -1915,7 +1963,7 @@ The older **implicit flow**, which returned tokens straight in the URL, is depre
 
 OIDC returns an **ID token**, a JWT describing the user (\`sub\`, \`email\`, \`iss\`, \`aud\`). Your app verifies it, then creates **its own** session. The **access token** is for calling the provider's APIs, not for logging into your app.
 
-In practice, use a well-maintained library or an identity service (Auth0, Clerk, Cognito, Keycloak) rather than hand-rolling these steps.
+In practice, don't hand-roll these steps. In ASP.NET Core, \`AddOpenIdConnect()\` runs the code flow for you (PKCE included), and Microsoft.Identity.Web does it for Microsoft Entra ID; providers such as Entra ID, Auth0 or Keycloak sit on the other side.
 `,
     takeaways: [
       'OAuth delegates limited access without sharing passwords; OIDC adds verified identity on top.',
@@ -1948,7 +1996,7 @@ In practice, use a well-maintained library or an identity service (Auth0, Clerk,
       { id: 'c-web-oauth-3', front: 'ID token vs access token?', back: 'ID token: a JWT about the user, for your app to verify. Access token: for calling the provider\'s API.' },
     ],
     related: ['web-tokens', 'web-auth-basics'],
-    sources: [SRC.oauthBcp, SRC.pkce, SRC.oidc, SRC.oauthBrowser],
+    sources: [SRC.oauthBcp, SRC.pkce, SRC.oidc, SRC.aspnetOidc],
   },
   {
     id: 'web-permissions',
@@ -1961,7 +2009,7 @@ Authentication tells you who's asking. Now decide what they may do.
 
 ## Deny by default
 
-Every route should be **closed unless a rule opens it**. New endpoints are the risky ones: someone adds \`GET /api/export\` and forgets the check. If the framework rejects requests with no explicit permission, forgetting fails safe.
+Every route should be **closed unless a rule opens it**. New endpoints are the risky ones: someone adds \`GET /api/export\` and forgets the check. If the framework rejects requests with no explicit permission, forgetting fails safe. In ASP.NET Core, a **fallback policy** that requires an authenticated user does this: every endpoint needs a login unless marked \`[AllowAnonymous]\`.
 
 ## Roles and ownership
 
@@ -1972,22 +2020,22 @@ Two kinds of rule cover most apps:
 
 Role checks alone miss the most common bug, where an ID in the URL is trusted:
 
-\`\`\`js
+\`\`\`csharp
 // Broken: any logged-in user can read any invoice by changing the ID
-app.get('/api/invoices/:id', requireLogin, async (req, res) => {
-  res.json(await db.invoice.find(req.params.id))
-})
+app.MapGet("/api/invoices/{id:int}", (int id, AppDbContext db) => db.Invoices.FindAsync(id))
+    .RequireAuthorization();
 
 // Fixed: the query itself includes the owner
-const invoice = await db.invoice.findFirst({ where: { id: req.params.id, userId: req.user.id } })
-if (!invoice) return res.status(404).end()
+var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+var invoice = await db.Invoices.SingleOrDefaultAsync(i => i.Id == id && i.OwnerId == userId);
+return invoice is null ? Results.NotFound() : Results.Ok(invoice);
 \`\`\`
 
 This is called an **insecure direct object reference** (IDOR). Never trust IDs from the client to mean "theirs"; check on the server, for every object.
 
 ## One place for the rules
 
-Scattered \`if (user.role === 'admin')\` checks drift apart. Put rules in one module or policy (for example \`can(user, 'edit', post)\`), call it from every route, and write **tests** for it: one test per rule that a forbidden user gets 403 or 404. Log denied attempts; a burst of them is often someone probing.
+Scattered \`if (user.role === 'admin')\` checks drift apart. Put rules in one place, such as ASP.NET Core **authorization policies** and resource-based handlers (\`await authz.AuthorizeAsync(user, post, "CanEdit")\`), call them from every route, and write **tests** for it: one test per rule that a forbidden user gets 403 or 404. Log denied attempts; a burst of them is often someone probing.
 
 Remember tokens carry roles as of when they were issued. If you demote someone, a token saying \`"role": "admin"\` stays valid until it expires, so either keep tokens short-lived or check important permissions against the database.
 `,
@@ -2023,7 +2071,7 @@ Remember tokens carry roles as of when they were issued. If you demote someone, 
       { id: 'c-web-permissions-3', front: 'Why centralise permission rules?', back: 'Scattered checks drift and get forgotten; one tested policy module is consistent and deny-by-default.' },
     ],
     related: ['web-auth-basics', 'web-security'],
-    sources: [SRC.authzCheat, SRC.owaspTop10],
+    sources: [SRC.authzCheat, SRC.owaspTop10, SRC.aspnetPolicies, SRC.aspnetResourceAuthz],
   },
   {
     id: 'web-dom-by-hand',
@@ -2214,7 +2262,7 @@ web.dev's article on rendering explains the trade-offs:
 - **Good**: fast first content; good for search and sharing; works for personalised, live data.
 - **Costs**: generating pages takes server time, which can slow the **time to first byte**, and needs running servers. Hydration can make a page **look ready before it can respond to input**, and it ships much of the same work twice.
 
-Frameworks like **Next.js** (React), **Nuxt** (Vue) and **SvelteKit** do SSR and hydration for you, often **streaming** HTML in chunks so the top of the page arrives first.
+Frameworks like **Next.js** (React), **Nuxt** (Vue) and **SvelteKit** do SSR and hydration for you, often **streaming** HTML in chunks so the top of the page arrives first. In .NET, **Razor Pages** render on the server, and **Blazor** can render on the server and then add interactivity, either over a live SignalR connection or by running .NET in the browser with WebAssembly.
 
 ## Static rendering
 
@@ -2256,7 +2304,7 @@ Many real sites **mix** these: static pages for marketing, SSR for product pages
       { id: 'c-web-render-where-3', front: 'What is an SPA?', back: 'A single-page application: one HTML shell; JavaScript changes the DOM to show each screen.' },
     ],
     related: ['web-frameworks', 'web-serve-dynamic'],
-    sources: [SRC.rendering],
+    sources: [SRC.rendering, SRC.blazor],
   },
   {
     id: 'web-build',
@@ -2267,7 +2315,7 @@ Many real sites **mix** these: static pages for marketing, SSR for product pages
     body: `
 ## Packages and modules
 
-Modern projects reuse code from **packages**, installed with **npm** (Node's package manager) and listed in \`package.json\`. Deliberate depends on React, React DOM and React Router; a typical project has hundreds of packages once you count their dependencies.
+Modern projects reuse code from **packages**, installed with **npm** (Node's package manager) and listed in \`package.json\`. (The .NET equivalents for a backend are **NuGet** packages, listed in the \`.csproj\` file.) Deliberate depends on React, React DOM and React Router; a typical project has hundreds of packages once you count their dependencies.
 
 Code is split into **modules**: files that \`import\` from each other.
 
@@ -2356,19 +2404,22 @@ Injection happens when **data is treated as code**. The OWASP Top 10, the best-k
 
 **SQL injection**: building a query by gluing in user input:
 
-\`\`\`js
+\`\`\`csharp
 // DANGEROUS: name = "x' OR '1'='1" returns everyone
-db.query("SELECT * FROM users WHERE name = '" + name + "'")
-// SAFE: a parameterised query keeps data as data
-db.query('SELECT * FROM users WHERE name = $1', [name])
+var sql = "SELECT * FROM Users WHERE Name = '" + name + "'";
+var users = db.Users.FromSqlRaw(sql);
+
+// SAFE: parameters keep data as data
+var users = db.Users.FromSql($"SELECT * FROM Users WHERE Name = {name}"); // {name} becomes @p0
+var users = db.Users.Where(u => u.Name == name);                          // LINQ: always parameterised
 \`\`\`
 
-OWASP's primary defence is exactly this: **parameterised queries**.
+OWASP's primary defence is exactly this: **parameterised queries**. EF Core's LINQ and \`FromSql\` with an interpolated string both send parameters; \`FromSqlRaw\` with a string you glued together does not.
 
 **Cross-site scripting (XSS)**: putting user input into a page so it runs as script. A comment containing \`<script>…</script>\` would run in every visitor's browser and could act as them. Defences:
 
-- **Escape output**: frameworks like React do this automatically for text in \`{…}\`.
-- Beware **escape hatches** like React's \`dangerouslySetInnerHTML\`, which OWASP's cheat sheet calls out; sanitise any HTML you must insert.
+- **Escape output**: React does this automatically for text in \`{…}\`, and Razor does for \`@value\`.
+- Beware **escape hatches** like React's \`dangerouslySetInnerHTML\` (which OWASP's cheat sheet calls out) or Razor's \`Html.Raw\`; sanitise any HTML you must insert.
 - Keep session cookies \`HttpOnly\`, and add a **Content Security Policy** as a second layer.
 
 ## Broken access control
@@ -2412,7 +2463,7 @@ If the server only checks "is someone logged in?" and not "does this invoice bel
       { id: 'c-web-security-3', front: 'What is broken access control?', back: 'Failing to check that the user may access that specific resource. OWASP\'s #1 risk (2025).' },
     ],
     related: ['web-session', 'web-routing', 'fg-secrets'],
-    sources: [SRC.owaspTop10, SRC.sqlCheat, SRC.xssCheat],
+    sources: [SRC.owaspTop10, SRC.sqlCheat, SRC.xssCheat, SRC.efRawSql],
   },
   {
     id: 'web-deploy',
@@ -2426,7 +2477,7 @@ If the server only checks "is someone logged in?" and not "does this invoice bel
 **Deploying** means getting your code running where users can reach it. How depends on what you built:
 
 - **Static sites and SPAs**: run the build and upload the output files to a static host or CDN. Deliberate works this way: on every push to \`main\`, a GitHub Actions workflow installs the packages, runs the checks and \`npm run build\`, and publishes \`dist/\` to GitHub Pages.
-- **Apps with a backend**: the server program must run somewhere, always on. Options range from **platforms** that run your code for you (Render, Fly.io, Heroku, Vercel and Netlify functions, Google Cloud Run) to **containers** on cloud machines you manage. Plus a hosted **database**.
+- **Apps with a backend**: the server program must run somewhere, always on. For .NET, \`dotnet publish -c Release\` produces the files to deploy (or a container image). Options range from **platforms** that run your code for you (Azure App Service, Azure Container Apps, Google Cloud Run, Render) to **containers** on machines you manage. Plus a hosted **database**, such as Azure SQL Database.
 
 Either way, good practice is **automated**: push to the main branch, CI runs tests and builds, and only a passing build deploys. The Software Engineering subject covers safe deployment strategies and rollbacks.
 
@@ -2481,6 +2532,6 @@ If Deliberate gained accounts, step 6 would add **fetch** calls to a **backend**
       { id: 'c-web-deploy-3', front: 'A record vs CNAME?', back: 'A: points a name to an IP address. CNAME: points a name to another name.' },
     ],
     related: ['fg-deploy-strategies', 'web-big-picture', 'web-cdn-cache'],
-    sources: [SRC.ghPages, SRC.letsEncrypt],
+    sources: [SRC.ghPages, SRC.letsEncrypt, SRC.dotnetDeploy],
   },
 ]

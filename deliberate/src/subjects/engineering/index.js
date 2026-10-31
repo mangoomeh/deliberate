@@ -15,7 +15,7 @@ export default {
   id: 'engineering',
   title: 'Software Engineering',
   short: 'Engineering',
-  tagline: 'Write code that is correct, readable, and easy to change, and run it well in production.',
+  tagline: 'Write code that is correct, readable, and easy to change, and run it well in production. Examples use C#, .NET and SQL Server.',
   color: { light: '#3056d3', dark: '#7c9bff' },
   units: [
     ...coreUnits,

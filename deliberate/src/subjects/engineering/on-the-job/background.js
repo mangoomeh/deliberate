@@ -58,7 +58,7 @@ Queues also smooth out bursts and let each part grow on its own:
         why: 'The queue absorbs the burst instead of the servers.',
       },
     ],
-    inTheWild: ['Sidekiq (Ruby), Celery (Python), BullMQ (Node), Hangfire (.NET)', 'AWS SQS, RabbitMQ, Google Pub/Sub', 'Postgres-backed queues like pg-boss and Oban'],
+    inTheWild: ['Hangfire and Quartz.NET (.NET), Sidekiq (Ruby), Celery (Python)', 'Azure Service Bus, AWS SQS, RabbitMQ', 'MassTransit and Wolverine for .NET messaging'],
     related: ['fg-queue-delivery', 'fg-workers'],
     cards: [
       { id: 'c-fg-bj-5', front: 'Why move work into a background job?', back: 'Users get a fast response, and slow or unreliable work can retry without failing the request.' },
@@ -147,9 +147,10 @@ Enqueue **after** the commit succeeds. For full safety, use the **outbox pattern
 
 Put **IDs** in the job, not copies of whole records:
 
-\`\`\`js
-jobs.enqueue('send-receipt', { orderId: 'o_42' })         // good
-jobs.enqueue('send-receipt', { order: wholeOrderObject }) // risky
+\`\`\`csharp
+// Hangfire
+BackgroundJob.Enqueue<ReceiptSender>(s => s.SendAsync(orderId));    // good: just the ID
+BackgroundJob.Enqueue<ReceiptSender>(s => s.SendAsync(wholeOrder)); // risky: a frozen copy
 \`\`\`
 
 By the time the job runs (seconds or hours later), the record may have changed. Loading it fresh gives the job current data, and keeps payloads small.
@@ -316,7 +317,7 @@ Cron jobs fail quietly. Their output often goes nowhere, and a job that stops ru
         why: 'A job that never runs logs no errors; only a missing heartbeat reveals it.',
       },
     ],
-    inTheWild: ['Kubernetes CronJob concurrencyPolicy: Forbid', 'Postgres advisory locks (pg_try_advisory_lock)', 'Redis SET NX with an expiry', 'Healthchecks.io and Cronitor'],
+    inTheWild: ['Kubernetes CronJob concurrencyPolicy: Forbid', 'SQL Server application locks (sp_getapplock)', 'Redis SET NX with an expiry', 'Healthchecks.io and Cronitor'],
     related: ['fg-cron', 'fg-heartbeats'],
     cards: [
       { id: 'c-fg-cr-3', front: 'How do you stop a scheduled job overlapping itself?', back: 'Take a lock (DB advisory lock, Redis key with expiry) or set the scheduler to forbid concurrent runs.' },
@@ -346,13 +347,18 @@ If the scheduler was down at 02:00, does the job run when it comes back, or wait
 
 The most robust design makes the timetable matter less. Instead of "send today's reminders", write "send **every reminder that's due and hasn't been sent**":
 
-\`\`\`js
-async function sendDueReminders(now = new Date()) {
-  const due = await db.reminders.findAll({ dueAt: { lte: now }, sentAt: null })
-  for (const r of due) {
-    await mailer.send(r)
-    await db.reminders.update(r.id, { sentAt: now }) // never sent twice
-  }
+\`\`\`csharp
+async Task SendDueRemindersAsync(DateTimeOffset now)
+{
+    var due = await db.Reminders
+        .Where(r => r.DueAt <= now && r.SentAt == null)
+        .ToListAsync();
+    foreach (var reminder in due)
+    {
+        await mailer.SendAsync(reminder);
+        reminder.SentAt = now;            // never sent twice
+        await db.SaveChangesAsync();
+    }
 }
 \`\`\`
 
@@ -402,17 +408,28 @@ A **background service** (also called a daemon, worker or consumer) is a process
 
 Almost every worker is the same loop:
 
-\`\`\`js
-while (!shuttingDown) {
-  const job = await queue.receive({ waitSeconds: 20 })
-  if (!job) continue
-  try {
-    await handle(job)
-    await queue.ack(job)
-  } catch (err) {
-    log.error({ err, jobId: job.id }, 'job failed')
-    await queue.retryLater(job)
-  }
+\`\`\`csharp
+public class JobWorker(IJobQueue queue, IJobHandler handler, ILogger<JobWorker> log)
+    : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            var job = await queue.ReceiveAsync(waitSeconds: 20, stoppingToken);
+            if (job is null) continue;
+            try
+            {
+                await handler.HandleAsync(job, stoppingToken);
+                await queue.AckAsync(job);
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, "Job {JobId} failed", job.Id);
+                await queue.RetryLaterAsync(job);
+            }
+        }
+    }
 }
 \`\`\`
 
@@ -420,7 +437,7 @@ Receive, handle, acknowledge, and on failure log and retry later. One bad job mu
 
 ## Supervisors and crash loops
 
-Processes crash. Something must notice and restart them: a **supervisor** such as systemd on a Linux server, Kubernetes or the container runtime, or PM2 for Node apps.
+Processes crash. Something must notice and restart them: a **supervisor** such as systemd on a Linux server, Kubernetes or the container runtime, or a Windows Service for .NET apps on Windows servers. In .NET, a long-running worker is a \`BackgroundService\`, hosted with \`builder.Services.AddHostedService<JobWorker>()\`.
 
 Good supervisors restart with **increasing delays**. Otherwise a process that crashes right after starting (say, because of a bad config value) restarts thousands of times a minute: a **crash loop**, spamming logs and hammering whatever it connects to.
 
@@ -602,13 +619,16 @@ Providers wait only a few seconds for your response, then treat the delivery as 
 
 Do the real work (updating orders, sending emails) in a **background job**.
 
-\`\`\`js
-app.post('/webhooks/payments', rawBody, async (req, res) => {
-  if (!verifySignature(req.rawBody, req.headers['x-signature'], SECRET)) return res.sendStatus(401)
-  const event = JSON.parse(req.rawBody)
-  await jobs.enqueue('process-payment-event', { eventId: event.id })
-  res.sendStatus(200)
-})
+\`\`\`csharp
+app.MapPost("/webhooks/payments", async (HttpRequest request, IBackgroundJobClient jobs) =>
+{
+    var rawBody = await new StreamReader(request.Body).ReadToEndAsync();
+    if (!VerifySignature(rawBody, request.Headers["X-Signature"], secret))
+        return Results.Unauthorized();
+    var evt = JsonSerializer.Deserialize<PaymentEvent>(rawBody)!;
+    jobs.Enqueue<PaymentEventProcessor>(p => p.ProcessAsync(evt.Id));
+    return Results.Ok();
+});
 \`\`\`
 
 ## Expect duplicates
