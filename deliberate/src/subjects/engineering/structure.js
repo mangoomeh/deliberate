@@ -294,9 +294,53 @@ Each strategy has the **same interface**, so callers don't care which runs, and 
 
 **Scenario**: when an order is placed, you send a receipt, update stock, record analytics and notify the warehouse. Calling all four from \`PlaceOrder\` makes it depend on every one.
 
-With **Observer** (publish/subscribe), \`PlaceOrder\` announces "order placed", and each concern subscribes. In C# that's an \`event\`, or a domain event handled by several \`INotificationHandler<OrderPlaced>\` classes (the MediatR style). Across services, it becomes a message bus such as Azure Service Bus.
+With **Observer** (publish/subscribe), \`PlaceOrder\` announces "order placed", and each concern subscribes. The simplest form in C# is a built-in \`event\`:
 
-**The cost**: flow becomes hidden. Reading \`PlaceOrder\` no longer tells you what happens, and a failing handler can be missed. Use it for genuinely independent side effects, not steps that must succeed together.
+\`\`\`csharp
+public record OrderPlaced(int OrderId, string Email);
+
+public class OrderService
+{
+    public event Action<OrderPlaced>? Placed;           // observers subscribe here
+
+    public void PlaceOrder(Order order)
+    {
+        // ...save the order...
+        Placed?.Invoke(new OrderPlaced(order.Id, order.Email));  // announce
+    }
+}
+
+orders.Placed += e => mailer.SendReceipt(e.Email, e.OrderId);
+orders.Placed += e => analytics.Track("order_placed", e.OrderId);
+\`\`\`
+
+In ASP.NET Core apps, observers are more often **handler classes** found through DI, so each one can have its own dependencies:
+
+\`\`\`csharp
+public interface IHandler<T> { Task HandleAsync(T evt); }
+
+public class SendReceipt(IMailer mailer) : IHandler<OrderPlaced>
+{
+    public Task HandleAsync(OrderPlaced e) => mailer.SendReceiptAsync(e.Email, e.OrderId);
+}
+
+public class EventPublisher(IServiceProvider services)
+{
+    public async Task PublishAsync<T>(T evt)
+    {
+        foreach (var handler in services.GetServices<IHandler<T>>())  // every registered observer
+            await handler.HandleAsync(evt);
+    }
+}
+
+// Program.cs: a new reaction is one new class and one line
+builder.Services.AddScoped<IHandler<OrderPlaced>, SendReceipt>();
+builder.Services.AddScoped<IHandler<OrderPlaced>, UpdateStock>();
+\`\`\`
+
+\`OrderService\` now just calls \`await publisher.PublishAsync(new OrderPlaced(order.Id, order.Email))\` and knows nothing about receipts or stock. Libraries such as MediatR (\`INotificationHandler<T>\`) package the same idea. Across services, it becomes a message bus such as Azure Service Bus.
+
+**The cost**: flow becomes hidden. Reading \`PlaceOrder\` no longer tells you what happens. In the publisher above, handlers run one after another, so one that throws stops the rest; catch and log per handler, or move slow and failure-prone reactions to a queue. Use Observer for genuinely independent side effects, not steps that must succeed together.
 
 ## Middleware: a chain of steps
 
@@ -413,7 +457,24 @@ Decorators stack, and each concern (caching, retries, logging, timing) stays in 
 
 **Scenario**: checking out means reserving stock, charging the card, creating a shipment and sending a receipt, and three controllers repeat that sequence.
 
-A **facade** offers one simple method over a complex subsystem: \`checkout.PlaceOrderAsync(cart, user)\`. Callers stop needing to know the parts or their order. Keep it thin: it coordinates, while the real logic stays in the parts.
+A **facade** offers one simple method over a complex subsystem:
+
+\`\`\`csharp
+public class CheckoutService(IInventory inventory, IPaymentGateway payments,
+                             IShipping shipping, IMailer mailer)
+{
+    public async Task<Order> PlaceOrderAsync(Cart cart, User user)
+    {
+        await inventory.ReserveAsync(cart.Items);
+        var payment = await payments.ChargeAsync(cart.TotalCents, user.CustomerId);
+        var order = await shipping.CreateShipmentAsync(cart, user.Address, payment.Id);
+        await mailer.SendReceiptAsync(user.Email, order);
+        return order;
+    }
+}
+\`\`\`
+
+Controllers now call \`checkout.PlaceOrderAsync(cart, user)\` and stop needing to know the parts or their order. Keep it thin: it coordinates, while the real logic stays in the parts. (A real version would also release the stock if the payment fails.)
 
 **Telling them apart**: an adapter **changes** an interface to fit; a decorator **keeps** the interface and adds behaviour; a facade **simplifies** many interfaces into one.
 `,
